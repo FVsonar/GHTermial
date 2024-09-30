@@ -1,0 +1,17 @@
+注： 每次打包都要切换到release 并复制最新的exe文件
+1. 工程切换至release模式  
+
+2.在下面文件夹中复制exe文件
+E:\CODE\2_Code\X-Terminal\GHTerminal\build-GHTermial-Desktop_Qt_5_15_2_MinGW_64_bit-Release\release
+
+3. 将复制的exe文件放到下面目录
+
+4. 打开命令行工具 执行一下命令
+    1. C:
+    2. 手动输入cd 
+    3. 复制目录 C:\Users\WD\Desktop\GHTerminal
+    4. 右键粘贴
+    3. windeployqt  --qmldir E:\CODE\2_Code\X-Terminal\GHTerminal\GHTermial\assets\qml QSerialTerminal.exe
+
+
+5. 将工程切换回DEBUG   
