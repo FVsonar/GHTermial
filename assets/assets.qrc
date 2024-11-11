@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/close.svg</file>
+        <file>icons/connect.svg</file>
+        <file>icons/developer-board.svg</file>
+        <file>icons/device-hub.svg</file>
+        <file>icons/disconnect.svg</file>
+        <file>icons/filter.svg</file>
+        <file>icons/flag.svg</file>
+        <file>icons/help.svg</file>
+        <file>icons/memory.svg</file>
+        <file>icons/save.svg</file>
+        <file>icons/toolbox.svg</file>
+        <file>icons/usb.svg</file>
+        <file>icons/workspaces.svg</file>
+        <file>images/icon.svg</file>
+        <file>qml/Windows/SerialSetup.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/UI.qml</file>
+        <file>qml/Widgets/Terminal.qml</file>
+        <file>icons/delete.svg</file>
+        <file>icons/attach.svg</file>
+        <file>icons/send.svg</file>
+        <file>qml/Windows/FileTransmission.qml</file>
+        <file>qml/Windows/FreqWriteUI.qml</file>
+        <file>qml/Widgets/CellView.qml</file>
+        <file>qml/delegate/HeaderDelegate.qml</file>
+        <file>qml/Widgets/ResizableColumnHeader.qml</file>
+        <file>qml/Widgets/RoundRect.qml</file>
+        <file>qml/Widgets/CellViewBasic.qml</file>
+    </qresource>
+</RCC>
