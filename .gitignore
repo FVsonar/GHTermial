@@ -28,3 +28,10 @@ Temporary Items
 
 # Qt project file
 *.pro.user
+
+# VSCode
+.vscode/
+.idea/
+
+./history
+

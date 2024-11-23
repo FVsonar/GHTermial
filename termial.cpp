@@ -2,6 +2,11 @@
 #include "ui_termial.h"
 // #include "CheckBoxUpdater.h"
 #include "Entity/channeldmr.h"
+#include "DAO/channeldmr_dao.h"
+#include "DAO/channel_dao.h"
+#include "DAO/dmr_dao.h"
+#include "DAO/tuner_dao.h"
+
 
 termial::termial(QWidget *parent)
     : QWidget(parent)
@@ -14,6 +19,9 @@ termial::termial(QWidget *parent)
     , tcpRetransmissionTimer0x41(new QTimer(this))
     , tcpRetransmissionTimer0x43(new QTimer(this))
     , tcpRetransmissionTimer0x44(new QTimer(this))
+    , tunerRetransmissionTimer0x46(new QTimer(this))
+    , tunerRetransmissionTimer0x47(new QTimer(this))
+    , tunerRetransmissionTimer0x48(new QTimer(this))
     , heartbeatTimer(new QTimer(this))
 {
     ui->setupUi(this);
@@ -25,7 +33,8 @@ termial::termial(QWidget *parent)
     initViewTable1000Col(); // 生成1000空白行
     initLoad(); // 初始化进度条
     initLanguageComboBox();
-
+    initTunerSwtRadioBtn();
+    tuner_v.forTheCurrentFocus(); // 初始化天调同步定时器
     tcpServer = new QTcpServer;
     initConnect();  // 信号and槽初始化
 
@@ -85,6 +94,8 @@ termial::~termial()
     qDeleteAll(bsModeComboBoxPtrList);
     bsModeComboBoxPtrList.clear();
 
+    delete swtBtnGroup; // 清理单选框组指针
+
     readySend40ChannelList.clear();
     readySend41ChannelList.clear();
     readySend43ChannelList.clear();
@@ -117,8 +128,8 @@ termial::~termial()
         tcpRetransmissionTimer0x44->stop();
     }
 
-    currentSerialport.setDataTerminalReady(false);
-    currentSerialport.setRequestToSend(false);
+    // currentSerialport.setDataTerminalReady(false);
+    // currentSerialport.setRequestToSend(false);
 
     disconnect(&currentSerialport, &QSerialPort::readyRead, this, &termial::currentSerialport_readyRead);
 
@@ -150,6 +161,7 @@ void termial::loadingLanguage(QString langName){
     qApp->installTranslator(&translator); // 如果加载成功，安装新翻译器
     // ui->retranslateUi(this); // 更新界面
 }
+
 /**
  *  异步加载翻译文件
  *  @param  翻译文件在资源文件夹下的名字
@@ -165,6 +177,31 @@ void termial::loadLanguageAsync(const QString &langName) {
 }
 
 /**
+ *  天调发送辅助函数
+ *  @return bool    true发送成功 false发送失败
+ */
+bool termial::tunerSend(QByteArray data){
+    if(connectionName == "" || connectionName.isEmpty()){
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        return false;
+    }
+    if(connectionName == "串口"){
+        debug("使用串口连接");
+        currentSerialport.write(data);
+    }
+    if(connectionName == "TCP"){
+        if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+            return false;
+        }
+        currentClient = getCurrentClientInfo();
+        currentClient.getSocket()->write(data);
+    }
+    return true;
+}
+
+
+
+/**
  *  串口
  *  设备回复 0x40
  *  channel写
@@ -172,10 +209,10 @@ void termial::loadLanguageAsync(const QString &langName) {
 void termial::serialHandleCommand0x40(channel& newChannel){
 
     // 判断回复的数据能否对应发送的命令
-    if(newChannel.getChannelID() != channelWrite.getChannelID()){
-        debug("0x40 非当前要读取的数据,等待超时重发 newChannel:")<<newChannel.getChannelID() << " , channelWrite:" << channelWrite.getChannelID();
-        return;
-    }
+    // if(newChannel.getChannelID() != channelWrite.getChannelID()){
+    //     debug("0x40 非当前要读取的数据,等待超时重发 newChannel:")<<newChannel.getChannelID() << " , channelWrite:" << channelWrite.getChannelID();
+    //     return;
+    // }
 
     // 关闭定时器
     if (retransmissionTimer0x40->isActive()) {
@@ -189,6 +226,7 @@ void termial::serialHandleCommand0x40(channel& newChannel){
         debug("写操作命令全部发送完成");
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
+        ui->send_btn->setText(tr("发送"));
         return;
     }
 
@@ -207,12 +245,11 @@ void termial::serialHandleCommand0x40(channel& newChannel){
 void termial::serialHandleCommand0x41(channel& newChannel){
     int newRow = newChannel.getChannelID();
 
-
     // 判断回复的是否为当前要读取的数据
-    if(newChannel.getChannelID() != channelRead.getChannelID()){
-        debug("0x41 非当前要读取的数据,等待超时重发 newChannel:")<<newChannel.getChannelID() << " , channelRead:" << channelRead.getChannelID();
-        return;
-    }
+    // if(newChannel.getChannelID() != channelRead.getChannelID()){
+    //     debug("0x41 非当前要读取的数据,等待超时重发 newChannel:")<<newChannel.getChannelID() << " , channelRead:" << channelRead.getChannelID();
+    //     return;
+    // }
 
     viewUpdate(newRow,newChannel);
 
@@ -228,6 +265,7 @@ void termial::serialHandleCommand0x41(channel& newChannel){
         debug("串口 0x41 全部发送完成");
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
+        ui->read_btn->setText(tr("读取"));
         return;
     }
 
@@ -235,7 +273,7 @@ void termial::serialHandleCommand0x41(channel& newChannel){
     serialPortTool.takeFirst41ListWrite(channelRead,readySend41ChannelList,currentSerialport);
 
     // 启动定时器，等待50毫秒，超时重发
-    retransmissionTimer0x41->start(50);
+    retransmissionTimer0x41->start(100);
 }
 
 /**
@@ -245,10 +283,10 @@ void termial::serialHandleCommand0x41(channel& newChannel){
  */
 void termial::serialHandleCommand0x43(DMR& newDmr){
     // 判断回复是否为当前要数据的数据
-    if(newDmr.getChannelID() != dmrWrite.getChannelID()){
-        debug("0x43 非当前要读取的数据,等待超时重发 newDmr:")<<newDmr.getChannelID() << " , dmrWrite:" << dmrWrite.getChannelID();
-        return;
-    }
+    // if(newDmr.getChannelID() != dmrWrite.getChannelID()){
+    //     debug("0x43 非当前要读取的数据,等待超时重发 newDmr:")<<newDmr.getChannelID() << " , dmrWrite:" << dmrWrite.getChannelID();
+    //     return;
+    // }
 
     if(retransmissionTimer0x43->isActive()){
         retransmissionTimer0x43->stop();
@@ -274,10 +312,10 @@ void termial::serialHandleCommand0x43(DMR& newDmr){
  */
 void termial::serialHandleCommand0x44(DMR& newDmr){
     /* dmr读取 */
-    if(newDmr.getChannelID() != dmrRead.getChannelID()){
-        debug("串口 0x44 非当前要读取的数据,等待超时重发 newDmr:")<<newDmr.getChannelID() << " , dmrRead:" << dmrRead.getChannelID();
-        return;
-    }
+    // if(newDmr.getChannelID() != dmrRead.getChannelID()){
+    //     debug("串口 0x44 非当前要读取的数据,等待超时重发 newDmr:")<<newDmr.getChannelID() << " , dmrRead:" << dmrRead.getChannelID();
+    //     return;
+    // }
 
     int newRow = newDmr.getChannelID();
     viewUpdateDmr(newRow,newDmr);
@@ -298,7 +336,7 @@ void termial::serialHandleCommand0x44(DMR& newDmr){
     serialPortTool.takeFirst44ListWrite(dmrRead,readySend44ChannelList,currentSerialport);
 
     // 启动定时器
-    retransmissionTimer0x44->start(50);
+    retransmissionTimer0x44->start(100);
 }
 
 /**
@@ -308,10 +346,10 @@ void termial::serialHandleCommand0x44(DMR& newDmr){
  */
 void termial::handleCommand0x40(channel& newChannel){
     // 判断回复的数据能否对应发送的命令
-    if(newChannel.getChannelID() != channelWrite.getChannelID()){
-        debug("非之前发送的数据,等待超时重发:")<<newChannel.getChannelID();
-        return;
-    }
+    // if(newChannel.getChannelID() != channelWrite.getChannelID()){
+    //     debug("非之前发送的数据,等待超时重发:")<<newChannel.getChannelID();
+    //     return;
+    // }
 
     // 关闭定时器
     if (tcpRetransmissionTimer0x40->isActive()) {
@@ -326,6 +364,7 @@ void termial::handleCommand0x40(channel& newChannel){
         heartbeatTimer->start();
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
+        ui->send_btn->setText(tr("发送"));
         return;
     }
 
@@ -345,10 +384,10 @@ void termial::handleCommand0x40(channel& newChannel){
  */
 void termial::handleCommand0x41(channel& newChannel){
     // 判断回复的是否为当前要读取的数据
-    if(newChannel.getChannelID() != channelRead.getChannelID()){
-        debug("非当前要读取的数据,等待超时重发")<<channelRead.getChannelID();
-        return;
-    }
+    // if(newChannel.getChannelID() != channelRead.getChannelID()){
+    //     debug("非当前要读取的数据,等待超时重发")<<newChannel.getChannelID()<<channelRead.getChannelID();
+    //     return;
+    // }
 
     tcpRetransmissionTimer0x41->stop();
 
@@ -363,6 +402,7 @@ void termial::handleCommand0x41(channel& newChannel){
         heartbeatTimer->start();
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
+        ui->read_btn->setText(tr("读取"));
         return;
     }
 
@@ -370,6 +410,7 @@ void termial::handleCommand0x41(channel& newChannel){
     currentClient = getCurrentClientInfo();
     // 获取41列表中第一个命令,发送后删除对应命令
     tcpTools.takeFirst41ListWrite(channelRead,readySend41ChannelList,currentClient);
+
 
     // 启动定时器，等待50毫秒，超时重发
     tcpRetransmissionTimer0x41->start(200);
@@ -381,10 +422,10 @@ void termial::handleCommand0x41(channel& newChannel){
  *  dmr写
  */
 void termial::handleCommand0x43(DMR& newDmr){
-    if(newDmr.getCallID() != dmrWrite.getCallID()){
-        debug("非之前发送的数据")<<newDmr.getCallID();
-        return;
-    }
+    // if(newDmr.getCallID() != dmrWrite.getCallID()){
+    //     debug("非之前发送的数据")<<newDmr.getCallID();
+    //     return;
+    // }
 
     if(tcpRetransmissionTimer0x43->isActive()){
         tcpRetransmissionTimer0x43->stop();
@@ -397,6 +438,7 @@ void termial::handleCommand0x43(DMR& newDmr){
         heartbeatTimer->start();    // 开启心跳包
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
+        ui->send_btn->setText(tr("发送"));
         return;
     }
 
@@ -415,10 +457,10 @@ void termial::handleCommand0x43(DMR& newDmr){
  */
 void termial::handleCommand0x44(DMR& newDmr){
     // 按段回复的是否为当前要读取的数据
-    if(newDmr.getChannelID() != dmrRead.getChannelID()){
-        debug("非当前要读取的数据,等待超时重发")<<channelRead.getChannelID();
-        return;
-    }
+    // if(newDmr.getChannelID() != dmrRead.getChannelID()){
+    //     debug("非当前要读取的数据,等待超时重发") << newDmr.getChannelID() <<dmrRead.getChannelID();
+    //     return;
+    // }
 
     int newRow = newDmr.getChannelID();
     viewUpdateDmr(newRow,newDmr);
@@ -432,6 +474,9 @@ void termial::handleCommand0x44(DMR& newDmr){
     if(readySend44ChannelList.isEmpty()){
         debug("44命令发送完毕");
         heartbeatTimer->start();    // 开启心跳包
+        ui->checkAll_pushButton->setEnabled(true);
+        ui->checkNotAll_pushButton->setEnabled(true);
+        ui->read_btn->setText(tr("读取"));
         return;
     }
 
@@ -439,7 +484,87 @@ void termial::handleCommand0x44(DMR& newDmr){
     tcpTools.takeFirst44ListWrite(dmrRead,readySend44ChannelList,currentClient);
 
     // 启动定时器
-    tcpRetransmissionTimer0x44->start(50);
+    tcpRetransmissionTimer0x44->start(100);
+}
+
+/**
+ *  设备回复  0x46
+ *  天调调谐指令
+ */
+void termial::handleCommand0x46(TUNER newTuner){
+    switch(newTuner.getTuningMode()){
+    case 0x00:
+        ui->tunerCurrentModel_label->setText("自动调谐");
+        break;
+    case 0x01:
+        ui->tunerCurrentModel_label->setText("手动调谐");
+        break;
+    case 0x03:
+        ui->tunerCurrentModel_label->setText("关闭调谐");
+        break;
+    }
+    // swtBtnGroup->button(newTuner.getTuningMode())->setChecked(true);
+    double value = ((double)newTuner.getSwtv())/10;
+    // ui->swtValue_doubleSpinBox->setValue(value);
+    ui->swtValue_label->setText(QString::number(value));
+    ui->swr_horizontalSlider->setValue(newTuner.getSwtv());
+    // 关闭天调定时器
+    if(tunerRetransmissionTimer0x46->isActive()){
+        tunerRetransmissionTimer0x46->stop();
+    }
+    ui->SWT_pushButton->setText(tr("驻波调谐"));
+}
+
+/**
+ *  设备回复  0x47
+ *  天调同步
+ */
+void termial::handleCommand0x47(TUNER newTuner){
+    // swtBtnGroup->button(newTuner.getTuningMode())->setChecked(true);
+    switch(newTuner.getTuningMode()){
+    case 0x00:
+        ui->tunerCurrentModel_label->setText("自动调谐");
+        break;
+    case 0x01:
+        ui->tunerCurrentModel_label->setText("手动调谐");
+        break;
+    case 0x03:
+        ui->tunerCurrentModel_label->setText("关闭调谐");
+        break;
+    }
+    double value = ((double)newTuner.getSwtv())/10;
+    // ui->swtValue_doubleSpinBox->setValue(value);
+    debug("((double)newTuner.getSwtv())/10:")<<value;
+    ui->swtValue_label->setText(QString::number(value));
+    ui->swr_horizontalSlider->setValue(newTuner.getSwtv());
+    // ui->voltage_label->setText(QString::number(newTuner.getVoltage())+"V");
+    double vv = (double)newTuner.getVoltage()/10;
+    ui->voltage_lcdNumber->display(vv);
+
+    // 关闭天调超时重发
+    if(tunerRetransmissionTimer0x47->isActive()){
+        tunerRetransmissionTimer0x47->stop();
+    }
+}
+
+/**
+ *  设备回复  0x48
+ *  天调校准指令
+ */
+void termial::handleCommand0x48(TUNER newTuner){
+    ui->PPc_label->setText(QString::number(newTuner.getPpcv()));
+    ui->Swc_label->setText(QString::number(newTuner.getSwcv()));
+    ui->Vc_label->setText(QString::number(newTuner.getVcv()));
+
+    // ui->Vc_horizontalSlider->setValue(newTuner.getVcv());
+    // ui->Swc_horizontalSlider->setValue(newTuner.getSwcv());
+    // ui->PPc_horizontalSlider->setValue(newTuner.getPpcv());
+
+    // 关闭天调定时器
+    if(tunerRetransmissionTimer0x48->isActive()){
+        tunerRetransmissionTimer0x48->stop();
+    }
+    ui->ATC_pushButton->setText(tr("天调校准"));
 }
 
 /**
@@ -451,7 +576,7 @@ void termial::handleCommand0x44(DMR& newDmr){
 void termial::viewAddData(int row){
     /* 复选框 */
     QCheckBox *checkBox = new QCheckBox;
-    checkBox->setChecked(isAllSet); // 设置复选框状态
+    checkBox->setChecked(false); // 设置复选框状态
     checkBox->setStyleSheet("margin-left:5%;"); // 居中显示
     ui->viewTable_tableWidget->setCellWidget(row, 0, checkBox); // 设置复选框到第0列
     checkBoxPrtList.append(checkBox);   // 方便反转和释放空间
@@ -603,7 +728,7 @@ void termial::viewAddData(int row){
 void termial::viewUpdate(int row, channel &newChannel){
     // 复选框
     QCheckBox *checkBox = checkBoxPrtList[row];
-    checkBox->setChecked(isAllSet); // 设置复选框状态
+    checkBox->setChecked(false); // 设置复选框状态
 
     // 信道号
     QTableWidgetItem* chId = ui->viewTable_tableWidget->item(row, 1);
@@ -1250,8 +1375,13 @@ ClientInfo termial::getCurrentClientInfo(){
  */
 void termial::initConnect(){
 
-    // 语言切换
+    /* 语言切换 */
     connect(ui->language_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),this,&termial::switchLanguage);
+    /* 页切换时 */
+    connect(ui->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this, &termial::tabWidgetSwitch);
+    /* 发送/读取 按钮点击时 */
+    connect(ui->send_btn, &QPushButton::clicked, this, &termial::send_clicked);
+    connect(ui->read_btn, &QPushButton::clicked, this, &termial::read_clicked);
 
     // 串口有数据可读时触发
     connect(&currentSerialport, &QSerialPort::readyRead, this, &termial::currentSerialport_readyRead);
@@ -1259,22 +1389,24 @@ void termial::initConnect(){
     connect(ui->serialport_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),this, &termial::serialportComboBox_currentIndexChanged);
     /* 串口按钮 */
     connect(ui->serialportLink_pushButton, &QPushButton::clicked, this, &termial::serialportLinkBtn_clicked); // 串口连接按钮点击时
-    connect(ui->read_pushButton, &QPushButton::clicked, this, &termial::readBtn_clicked); // 串口读取按钮点击时
-    connect(ui->send_pushButton, &QPushButton::clicked, this, &termial::sendBtn_clicked); // 串口发送按钮点击时
+
     /* 串口 定时器超时信号 */
     connect(retransmissionTimer0x40, &QTimer::timeout, this, &termial::onTimeout0x40);
     connect(retransmissionTimer0x41, &QTimer::timeout, this, &termial::onTimeout0x41);
     connect(retransmissionTimer0x43, &QTimer::timeout, this, &termial::onTimeout0x43);
     connect(retransmissionTimer0x44, &QTimer::timeout, this, &termial::onTimeout0x44);
-
-
-    /* TCP按钮 */
-    connect(ui->tcpOpen_pushButton, &QPushButton::clicked, this, &termial::tcpOpenBtn_clicked);
     /* tcp 定时器超时信号 */
     connect(tcpRetransmissionTimer0x40, &QTimer::timeout, this, &termial::tcpOnTimeout0x40);
     connect(tcpRetransmissionTimer0x41, &QTimer::timeout, this, &termial::tcpOnTimeout0x41);
     connect(tcpRetransmissionTimer0x43, &QTimer::timeout, this, &termial::tcpOnTimeout0x43);
     connect(tcpRetransmissionTimer0x44, &QTimer::timeout, this, &termial::tcpOnTimeout0x44);
+    /* 天调 定时器超时信号 */
+    connect(tunerRetransmissionTimer0x46, &QTimer::timeout, this, &termial::tunerOnTimer0x46);
+    connect(tunerRetransmissionTimer0x47, &QTimer::timeout, this, &termial::tunerOnTimer0x47);
+    connect(tunerRetransmissionTimer0x48, &QTimer::timeout, this, &termial::tunerOnTimer0x48);
+
+    /* TCP按钮 */
+    connect(ui->tcpOpen_pushButton, &QPushButton::clicked, this, &termial::tcpOpenBtn_clicked);
 
 
     // 监听单行文本框的回车按下事件
@@ -1290,6 +1422,22 @@ void termial::initConnect(){
     connect(ui->open_pushButton, &QPushButton::clicked, this, &termial::openBtn_clicked);
     // 监听串口刷新按钮点击事件
     connect(ui->serialportFlash_pushButton, &QPushButton::clicked, this, &termial::serialportFlashBtn_clicked);
+
+    /* 天调 */
+    connect(ui->SWT_pushButton, &QPushButton::clicked, this, &termial::swtBtn_clicked);
+    // connect(ui->TUNER_synchronous_pushButton, &QPushButton::clicked,this, &termial::TUNER_synchronousBtn_clicked);
+    connect(ui->ATC_pushButton, &QPushButton::clicked, this, &termial::ATCbtn_clicked);
+    // 滑块变动
+    connect(ui->Swc_horizontalSlider,&QSlider::valueChanged,this,&termial::swcHorizontalSlier_valueChanged);
+    connect(ui->PPc_horizontalSlider,&QSlider::valueChanged,this,&termial::ppcHorizontalSlier_valueChanged);
+    connect(ui->Vc_horizontalSlider, &QSlider::valueChanged,this,&termial::vcHorizontalSlier_valueChanged);
+    //
+    connect(ui->Vcv_spinBox, &QSpinBox::valueChanged,this,&termial::vcvSpinBox_valueChanged);
+    connect(ui->PPcv_spinBox, &QSpinBox::valueChanged,this,&termial::ppcvSpinBox_valueChanged);
+    connect(ui->Swcv_spinBox, &QSpinBox::valueChanged,this,&termial::swcvSpinBox_valueChanged);
+    //
+    connect(ui->swtValue_doubleSpinBox, &QDoubleSpinBox::valueChanged, this,&termial::swtDoubleSpinBox_valueChanged);
+    connect(ui->swtValue_dial, &QDial::valueChanged,this, &termial::swtDial_valueChanged);
 }
 
 /**
@@ -1306,7 +1454,17 @@ void termial::initLanguageComboBox(){
     ui->language_comboBox->addItem("Русский язык");
     ui->language_comboBox->addItem("Español");
     ui->language_comboBox->addItem("हिंदी भाषा");
+}
 
+/**
+ *  初始化天调驻波调谐 单选框
+ */
+void termial::initTunerSwtRadioBtn(){
+    swtBtnGroup = new QButtonGroup;
+    swtBtnGroup->addButton(ui->auto_radioButton,0);
+    swtBtnGroup->addButton(ui->start_radioButton,1);
+    swtBtnGroup->addButton(ui->close_radioButton,3);
+    swtBtnGroup->button(0)->setChecked(true);
 }
 
 /**
@@ -1318,6 +1476,7 @@ void termial::initArt()
 {
     // 图标
     this->setWindowIcon(QIcon("://GHTermial.ico"));
+    ui->swr_horizontalSlider->setEnabled(false);
 
     // ui->viewTable_tableWidget->setStyleSheet("background-color:darkgray");
     // this->setStyleSheet("background-color:darkgray");
@@ -1375,17 +1534,9 @@ void termial::initViewTable1000Col(){
 *   初始化按钮状态
 */
 void termial::initPushBtnState(){
-
-    // ui->open_pushButton->setEnabled(false);
-    // ui->save_pushButton->setEnabled(false);
-    ui->read_pushButton->setEnabled(false);
-    ui->send_pushButton->setEnabled(false);
     ui->checkAll_pushButton->setEnabled(false);
     ui->checkNotAll_pushButton->setEnabled(false);
-    ui->tcpRead_pushButton->setEnabled(false);
-    ui->tcpSend_pushButton->setEnabled(false);
     debug("初始化按钮状态");
-
 }
 
 
@@ -1424,6 +1575,154 @@ void termial::initLoad(){
 }
 
 // 槽函数
+/**
+ *
+ */
+void termial::vcvSpinBox_valueChanged(int value){
+    ui->Vc_horizontalSlider->setValue(value);
+}
+void termial::swcvSpinBox_valueChanged(int value){
+    ui->Swc_horizontalSlider->setValue(value);
+}
+void termial::ppcvSpinBox_valueChanged(int value){
+    ui->PPc_horizontalSlider->setValue(value);
+}
+void termial::swtDial_valueChanged(int value){
+    double v = (double)value / 10;
+    ui->swtValue_doubleSpinBox->setValue(v);
+
+}
+void termial::swtDoubleSpinBox_valueChanged(double value){
+    value = value*10;
+    ui->swtValue_dial->setValue(value);
+}
+
+/**
+ *  当swc滑块发生变化时
+ */
+void termial::swcHorizontalSlier_valueChanged(int value){
+    ui->Swcv_spinBox->setValue(value);
+}
+/**
+ *   当ppc滑块发生变化时
+ */
+void termial::ppcHorizontalSlier_valueChanged(int value){
+    ui->PPcv_spinBox->setValue(value);
+}
+/**
+ *
+ */
+void termial::vcHorizontalSlier_valueChanged(int value){
+    ui->Vcv_spinBox->setValue(value);
+}
+
+/**
+ *  槽函数
+ *  0x46 驻波调谐按钮被点击
+ *  传递被选中的单选框下标和驻波调谐值
+ *  0~2         1.0~14.0
+ */
+void termial::swtBtn_clicked(){
+    if(ui->SWT_pushButton->text() == tr("驻波调谐")){
+        QByteArray data = tuner_v.swtBtn_clicked(swtBtnGroup->checkedId(), ui->swtValue_doubleSpinBox->value());
+        if(tunerSend(data) == false){
+            ui->SWT_pushButton->setText(tr("驻波调谐"));
+            return;
+        }
+        //0x46启动定时器
+        tunerRetransmissionTimer0x46->start(500);
+    }else{
+        ui->SWT_pushButton->setText(tr("驻波调谐"));
+        if(tunerRetransmissionTimer0x46->isActive()){
+            tunerRetransmissionTimer0x46->stop();
+        }
+
+    }
+}
+
+/**
+ *  槽函数
+ *  0x47
+ *  天调同步按钮点击时
+ */
+void termial::TUNER_synchronousBtn_clicked(){
+    // if(ui->TUNER_synchronous_pushButton->text() == tr("天调同步")){
+    //     QByteArray data = tuner_v.TUNER_synchronousBtn_clicked();
+    //     if(tunerSend(data) == false){
+    //         ui->TUNER_synchronous_pushButton->setText(tr("天调同步"));
+    //         return;
+    //     }
+    //     // 0x47启动定时器
+    //     tunerRetransmissionTimer0x47->start(100);
+    //     ui->TUNER_synchronous_pushButton->setText(tr("定时同步中..."));
+
+    //     /* 启动定时 天调同步 */
+    //     if(!(connectionName == "" || connectionName.isEmpty())){
+    //         connect(&tuner_v,&TUNER_view::onTimerOut0x47,this,&termial::onTimerout0x47);
+    //     }
+    // }else{
+    //     if(tunerRetransmissionTimer0x47->isActive()){
+    //         tunerRetransmissionTimer0x47->stop();
+    //     }
+    //     disconnect(&tuner_v,&TUNER_view::onTimerOut0x47,this,&termial::onTimerout0x47);
+    //     ui->TUNER_synchronous_pushButton->setText(tr("天调同步"));
+    // }
+    QByteArray data = tuner_v.TUNER_synchronousBtn_clicked();
+    tunerSend(data);
+    // 0x47启动定时器
+    tunerRetransmissionTimer0x47->start(100);
+    // ui->TUNER_synchronous_pushButton->setText(tr("定时同步中..."));
+
+    /* 启动定时 天调同步 */
+    if(!(connectionName == "" || connectionName.isEmpty())){
+        connect(&tuner_v,&TUNER_view::onTimerOut0x47,this,&termial::onTimerout0x47);
+    }
+}
+
+/**
+ *  槽函数
+ *  0x48
+ *  天调校准按钮点击时
+ */
+void termial::ATCbtn_clicked(){
+    if(ui->ATC_pushButton->text() == tr("天调校准")){
+        // 99是-100 0是-1 100是0 200是100
+        // int ppcv = ui->PPcv_spinBox->value();
+        // int swcv = ui->Swcv_spinBox->value();
+        // int vcv = ui->Vcv_spinBox->value();
+
+        int ppcv2 = ui->PPc_horizontalSlider->value();
+        int swcv2 = ui->Swc_horizontalSlider->value();
+        int vcv2 = ui->Vc_horizontalSlider->value();
+
+        // ppcv = (ppcv < 0) ? (-ppcv)-1 : ppcv + 100;
+        // swcv = (swcv < 0) ? (-swcv)-1 : swcv + 100;
+        // vcv  = (vcv  < 0) ? (-vcv)-1  : vcv  + 100;
+
+        ppcv2 = (ppcv2 < 0) ? (-ppcv2)-1 : ppcv2 + 100;
+        swcv2 = (swcv2 < 0) ? (-swcv2)-1 : swcv2 + 100;
+        vcv2  = (vcv2  < 0) ? (-vcv2)-1  : vcv2  + 100;
+
+        // debug("ppcv")<<ppcv<<",swcv"<<swcv<<",vcv"<<vcv;
+        debug("ppcv2")<<ppcv2<<",swcv2"<<swcv2<<",vcv2"<<vcv2;
+
+        // QByteArray data = tuner_v.ATCbtn_clicked(ppcv,swcv,vcv);
+        QByteArray data = tuner_v.ATCbtn_clicked(ppcv2,swcv2,vcv2);
+        if(tunerSend(data) == false){
+            ui->ATC_pushButton->setText(tr("天调校准"));
+            return;
+        }
+        // 0x48启动定时器
+        tunerRetransmissionTimer0x48->start(100);
+        ui->ATC_pushButton->setText(tr("正在等待回复..."));
+    }else{
+        if(tunerRetransmissionTimer0x48->isActive()){
+            tunerRetransmissionTimer0x48->stop();
+        }
+        ui->ATC_pushButton->setText(tr("天调校准"));
+    }
+}
+
 /**
  *  槽函数
  *  串口刷新按钮点击事件
@@ -1495,6 +1794,57 @@ void termial::switchLanguage(int index){
 }
 
 /**
+ *  槽函数
+ *  页切换时
+ *  @param  int index   页索引,从0开始
+ */
+void termial::tabWidgetSwitch(int index){
+    debug("页面切换->")<<index;
+    // 断开所有已有的信号连接
+    disconnect(&tuner_v, &TUNER_view::onTimerOut0x47, this, &termial::onTimerout0x47);
+    tuner_v.setTimerout0x47(false);
+
+    ui->save_pushButton->setEnabled(false);
+    ui->open_pushButton->setEnabled(false);
+    ui->send_btn->setEnabled(false);
+    ui->read_btn->setEnabled(false);
+    switch(index){
+    case 0:
+        /* 首页 */
+        currentPage = tr("首页");
+        break;
+    case 1:
+        /* 编程页 */
+        currentPage = tr("编程");
+        ui->save_pushButton->setEnabled(true);
+        ui->open_pushButton->setEnabled(true);
+        ui->send_btn->setEnabled(true);
+        ui->read_btn->setEnabled(true);
+        break;
+    case 2:
+        /* 设置页 */
+        currentPage = tr("设置");
+        break;
+    case 3:
+        /* 工程模式 */
+        currentPage = tr("工程模式");
+        break;
+    case 4:
+        /* 天调页 */
+        currentPage = tr("天调");
+        if(connectionName == "" || connectionName.isEmpty()){
+            QMessageBox::warning(this, tr("警告") , tr("请先连接串口/TCP"));
+            ui->tabWidget->setCurrentIndex(0);
+            return;
+        }
+        // 开启天调同步
+        tuner_v.setTimerout0x47(true);
+        TUNER_synchronousBtn_clicked();
+        break;
+    }
+}
+
+/**
  * 当tcp连接按钮被点击时
  */
 void termial::tcpOpenBtn_clicked(){
@@ -1531,6 +1881,7 @@ void termial::tcpOpenBtn_clicked(){
 
         tcpOpenBtn_state = true;
         ui->tcpOpen_pushButton->setText(tr("关闭服务器"));
+        connectionName = "TCP";
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
         ui->save_pushButton->setEnabled(true);
@@ -1551,6 +1902,12 @@ void termial::tcpOpenBtn_clicked(){
             tcpRetransmissionTimer0x44->stop();
         if(heartbeatTimer->isActive())
             heartbeatTimer->stop();
+        if(tunerRetransmissionTimer0x46->isActive())
+            tunerRetransmissionTimer0x46->stop();
+        if(tunerRetransmissionTimer0x47->isActive())
+            tunerRetransmissionTimer0x47->stop();
+        if(tunerRetransmissionTimer0x48->isActive())
+            tunerRetransmissionTimer0x48->stop();
 
         // 断开与 newConnection 信号的连接
         disconnect(tcpServer, &QTcpServer::newConnection, this, &termial::tcpServerNewConnection);
@@ -1576,11 +1933,14 @@ void termial::tcpOpenBtn_clicked(){
 
         tcpOpenBtn_state = false;
         ui->tcpOpen_pushButton->setText(tr("开启服务器"));
+        connectionName = "";
         ui->checkAll_pushButton->setEnabled(false);
         ui->checkNotAll_pushButton->setEnabled(false);
         ui->save_pushButton->setEnabled(false);
         ui->open_pushButton->setEnabled(false);
         ui->serialportLink_pushButton->setEnabled(true);
+        ui->read_btn->setText(tr("读取"));
+        ui->send_btn->setText(tr("发送"));
     }
 }
 
@@ -1614,8 +1974,6 @@ void termial::tcpServerNewConnection(){
     tcpSocketList.append(clientInfo);   // 加入列表
 
     connect(newSocket,&QTcpSocket::readyRead,this,&termial::tcpSocket_readyRead);
-    connect(ui->tcpRead_pushButton,&QPushButton::clicked,this,&termial::tcpReadBtn_clicked);
-    connect(ui->tcpSend_pushButton,&QPushButton::clicked,this,&termial::tcpSendBtn_clicked);
 
     // 当连接断开时
     connect(newSocket, &QTcpSocket::disconnected,this,[this,newSocket](){
@@ -1635,8 +1993,6 @@ void termial::tcpServerNewConnection(){
 
     // 更新下拉框
     ui->connectedDevices_comboBox->addItem(clientIP.toString() + ":" + QString::number(clientPort));
-    ui->tcpRead_pushButton->setEnabled(true);
-    ui->tcpSend_pushButton->setEnabled(true);
 }
 
 /**
@@ -1658,45 +2014,85 @@ void termial::tcpSocket_readyRead(){
         return;
     }
 
-    channel newChannel;
-    DMR newDmr;
+    // channel newChannel;
+    // DMR newDmr;
+    // TUNER newTuner;
 
     // 判断数据是否合法
     QByteArray dataPacket;   // 合法的数据会保存到这个List中
-    dataPacket = tool.parsePackets(data);
+    // dataPacket = tool.parsePackets(data);
+    dataPacket = tool.parsePacketsPlus(data);
     if(dataPacket.isEmpty() || dataPacket == ""){
         debug("此次传输没有收到有效数据");
         return;
     }
-
+    debug("data:")<<data.toHex(' ')<<"\ndataPacket:"<<dataPacket.toHex(' ');
     // 判断传回来的是什么命令
     switch(dataPacket[5])
     {
     case 0x40:
         /* 发送 */
-        debug("接受到的消息:\n")<<data.toHex(' ');
-        newChannel.radioWriteResponseToObj(dataPacket);
-        handleCommand0x40(newChannel);
+    {
+            debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+            // newChannel.radioWriteResponseToObj(dataPacket);
+            channel newChannel = channel_dao.dataToObj0x40(dataPacket);
+            handleCommand0x40(newChannel);
+    }
         break;
     case 0x41:
         /* 读取 */
-        debug("接受到的消息:\n")<<data.toHex(' ');
-        newChannel.radioReadResponseToObj(dataPacket);
-        handleCommand0x41(newChannel);
+    {
+            debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+            // newChannel.radioReadResponseToObj(dataPacket);
+            channel newChannel = channel_dao.dataToObj0x41(dataPacket);
+            handleCommand0x41(newChannel);
+    }
         break;
     case 0x43:
         /* dmr写 */
-        debug("接受到的消息:\n")<<data.toHex(' ');
-        newDmr.dataToDMR(dataPacket);
-        handleCommand0x43(newDmr);
+    {
+            debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+            // newDmr.dataToDMR(dataPacket);
+            DMR newDmr = dmr_dao.dataToObj0x43(dataPacket);
+            handleCommand0x43(newDmr);
+    }
         break;
     case 0x44:
         /* dmr读取 */
-        debug("接受到的消息:\n")<<data.toHex(' ');
-        newDmr.dataToDMR(dataPacket);
-        handleCommand0x44(newDmr);
+    {
+            debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+            // newDmr.dataToDMR(dataPacket);
+            DMR newDmr = dmr_dao.dataToObj0x44(dataPacket);
+            handleCommand0x44(newDmr);
+    }
+        break;
+    case 0x46:
+    {
+        debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+        // newTuner.dataToObj0x46(dataPacket);
+        TUNER newTuner = tuner_dao.dataToObj0x46(dataPacket);
+        handleCommand0x46(newTuner);
+    }
+        break;
+    case 0x47:
+    {
+        debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+        // newTuner.dataToObj0x47(dataPacket);
+        TUNER newTuner = tuner_dao.dataToObj0x47(dataPacket);
+        handleCommand0x47(newTuner);
+    }
+        break;
+    case 0x48:
+    {
+        debug("接受到的消息:\n")<<dataPacket.toHex(' ');
+        // newTuner.dataToObj0x48(dataPacket);
+        TUNER newTuner = tuner_dao.dataToObj0x48(dataPacket);
+        handleCommand0x48(newTuner);
+    }
         break;
     }
+
+
 }
 
 /**
@@ -1737,8 +2133,8 @@ void termial::tcpReadBtn_clicked(){
     ui->checkNotAll_pushButton->setEnabled(false);
 
     // 启动定时器，等待50毫秒，超时重发
-    tcpRetransmissionTimer0x41->start(50);
-    tcpRetransmissionTimer0x44->start(50);
+    tcpRetransmissionTimer0x41->start(100);
+    tcpRetransmissionTimer0x44->start(100);
 }
 
 /**
@@ -1757,6 +2153,7 @@ void termial::tcpSendBtn_clicked(){
 
     if(readySend40ChannelList.isEmpty()){
         debug("没有选中任何行");
+        ui->send_btn->setText(tr("发送"));
         return;
     }
     // 计算进度条
@@ -1820,8 +2217,7 @@ void termial::tcpOnTimeout0x43(){
 
 /**
  *  tcp
- *  0x44
- *  超时重发
+ *  0x44 超时重发
  */
 void termial::tcpOnTimeout0x44(){
     if(heartbeatTimer->isActive())
@@ -1830,6 +2226,107 @@ void termial::tcpOnTimeout0x44(){
     debug("tcp 0x44超时重发: \n")<<data.toHex(' ');
     currentClient.getSocket()->write(data);
 }
+
+/**
+ *  天调
+ *  0x46 超时重发
+ */
+void termial::tunerOnTimer0x46(){
+    if(ui->auto_radioButton->isChecked()){
+        return;
+    }
+    if(ui->tunerCurrentModel_label->text() == tr("自动调谐")){
+        return;
+    }
+    if(connectionName == "" || connectionName.isEmpty()){
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        if(tunerRetransmissionTimer0x46->isActive())
+            tunerRetransmissionTimer0x46->stop();
+        return;
+    }
+    QByteArray data = tuner_v.swtBtn_clicked(swtBtnGroup->checkedId(), ui->swtValue_doubleSpinBox->value());
+    if(connectionName == "串口"){
+        debug("使用串口连接");
+        currentSerialport.write(data);
+    }
+    if(connectionName == "TCP"){
+        if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+            return;
+        }
+        currentClient = getCurrentClientInfo();
+        currentClient.getSocket()->write(data);
+    }
+}
+/**
+ *  天调
+ *  0x47 超时重发
+ */
+void termial::tunerOnTimer0x47(){
+    if(connectionName == "" || connectionName.isEmpty()){
+        if(tunerRetransmissionTimer0x47->isActive())
+            tunerRetransmissionTimer0x47->stop();
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        return;
+    }
+
+    QByteArray data = tuner_v.TUNER_synchronousBtn_clicked();
+    if(connectionName == "串口"){
+        debug("使用串口连接");
+        currentSerialport.write(data);
+    }
+    if(connectionName == "TCP"){
+        if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+            return;
+        }
+        currentClient = getCurrentClientInfo();
+        currentClient.getSocket()->write(data);
+    }
+}
+
+/**
+ *  天调
+ *  0x48 超时重发  ATCbtn_clicked(int ppcv,int swcv,int vcv)
+ */
+void termial::tunerOnTimer0x48(){
+    if(connectionName == "" || connectionName.isEmpty()){
+        debug("--4--");
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        if(tunerRetransmissionTimer0x48->isActive())
+            tunerRetransmissionTimer0x48->stop();
+        return;
+    }
+    // 99是-100 0是-1 100是0 200是100
+    // int ppcv = ui->PPcv_spinBox->value();
+    // int swcv = ui->Swcv_spinBox->value();
+    // int vcv = ui->Vcv_spinBox->value();
+
+    int ppcv2 = ui->PPc_horizontalSlider->value();
+    int swcv2 = ui->Swc_horizontalSlider->value();
+    int vcv2 = ui->PPc_horizontalSlider->value();
+
+    // ppcv = (ppcv < 0) ? (-ppcv)-1 : ppcv + 100;
+    // swcv = (swcv < 0) ? (-swcv)-1 : swcv + 100;
+    // vcv  = (vcv  < 0) ? (-vcv)-1  : vcv  + 100;
+
+    ppcv2 = (ppcv2 < 0) ? (-ppcv2)-1 : ppcv2 + 100;
+    swcv2 = (swcv2 < 0) ? (-swcv2)-1 : swcv2 + 100;
+    vcv2  = (vcv2  < 0) ? (-vcv2)-1  : vcv2  + 100;
+
+    // QByteArray data = tuner_v.ATCbtn_clicked(ppcv,swcv,vcv);
+    QByteArray data = tuner_v.ATCbtn_clicked(ppcv2,swcv2,vcv2);
+    if(connectionName == "串口"){
+        debug("使用串口连接");
+        currentSerialport.write(data);
+    }
+    if(connectionName == "TCP"){
+        if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+            return;
+        }
+        currentClient = getCurrentClientInfo();
+        currentClient.getSocket()->write(data);
+    }
+}
+
 
 /**
  *  当串口下拉框发生变化时
@@ -1852,23 +2349,23 @@ void termial::serialportLinkBtn_clicked(){
         // 打开串口
         if(!currentSerialport.open(QIODevice::ReadWrite)){
             debug("没有成功打开串口")<< currentSerialport.errorString();
+            QMessageBox::warning(this, tr("警告") , tr("没有成功打开串口,") + currentSerialport.errorString());
             return;
         }
 
         ui->save_pushButton->setEnabled(true);
         ui->open_pushButton->setEnabled(true);
-        ui->read_pushButton->setEnabled(true);
-        ui->send_pushButton->setEnabled(true);
         ui->checkAll_pushButton->setEnabled(true);
         ui->checkNotAll_pushButton->setEnabled(true);
         ui->serialport_comboBox->setEnabled(false);
         ui->tcpOpen_pushButton->setEnabled(false);
 
         ui->serialportLink_pushButton->setText(tr("断开"));
+        connectionName = "串口";
     }else{
 
-        currentSerialport.setDataTerminalReady(false);
-        currentSerialport.setRequestToSend(false);
+        // currentSerialport.setDataTerminalReady(false);
+        // currentSerialport.setRequestToSend(false);
 
         // 等待一段时间，确保信号生效
         QThread::msleep(100);
@@ -1885,16 +2382,23 @@ void termial::serialportLinkBtn_clicked(){
             retransmissionTimer0x43->stop();
         if(retransmissionTimer0x44->isActive())
             retransmissionTimer0x44->stop();
+        if(tunerRetransmissionTimer0x46->isActive())
+            tunerRetransmissionTimer0x46->stop();
+        if(tunerRetransmissionTimer0x47->isActive())
+            tunerRetransmissionTimer0x47->stop();
+        if(tunerRetransmissionTimer0x48->isActive())
+            tunerRetransmissionTimer0x48->stop();
 
         ui->save_pushButton->setEnabled(false);
         ui->open_pushButton->setEnabled(false);
-        ui->read_pushButton->setEnabled(false);
-        ui->send_pushButton->setEnabled(false);
         ui->checkAll_pushButton->setEnabled(false);
         ui->checkNotAll_pushButton->setEnabled(false);
         ui->serialport_comboBox->setEnabled(true);
         ui->tcpOpen_pushButton->setEnabled(true);   // 使用串口连接时不可网络连接
         ui->serialportLink_pushButton->setText(tr("连接"));
+        ui->read_btn->setText(tr("读取"));
+        ui->send_btn->setText(tr("发送"));
+        connectionName = "";
     }
     serialportLinkBtn_state = !serialportLinkBtn_state; // 点击后更改按钮状态
 
@@ -2025,7 +2529,6 @@ void termial::openBtn_clicked(){
 
 }
 
-
 /**
  *  串口
  *  0x41
@@ -2036,8 +2539,9 @@ void termial::readBtn_clicked(){
     getAllCheckedRowsToList(readySend41ChannelList);    // 将所有选中行放入List待发送列表
     getAllCheckedRowsToListDmr(readySend44ChannelList);
 
-    if(readySend41ChannelList.isEmpty()){
+    if(readySend41ChannelList.isEmpty() && readySend44ChannelList.isEmpty()){
         debug("没有选中任何行");
+        ui->read_btn->setText(tr("读取"));
         return;
     }
 
@@ -2054,9 +2558,98 @@ void termial::readBtn_clicked(){
     ui->checkNotAll_pushButton->setEnabled(false);
 
     // 启动定时器，等待50毫秒，超时重发
-    retransmissionTimer0x41->start(50);
+    retransmissionTimer0x41->start(100);
     // 启动44定时器,等待50ms,超时重发
-    retransmissionTimer0x44->start(50);
+    retransmissionTimer0x44->start(100);
+
+}
+
+/**
+ *  控制区
+ *  发送按钮点击时
+ */
+void termial::send_clicked(){
+    if(connectionName == "" || connectionName.isEmpty()){
+        if(retransmissionTimer0x40->isActive()){
+            retransmissionTimer0x40->stop();
+        }
+        if(retransmissionTimer0x43->isActive()){
+            retransmissionTimer0x43->stop();
+        }
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        return;
+    }
+    // 判断走TCP还是串口
+    if(ui->send_btn->text() == tr("发送")){
+        ui->send_btn->setText("正在发送..");
+        if(connectionName == "串口"){
+            sendBtn_clicked();
+        }
+        if(connectionName == "TCP"){
+            if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+                return;
+            }
+            tcpSendBtn_clicked();
+        }
+    }else{
+        ui->send_btn->setText(tr("发送"));
+        if(retransmissionTimer0x40->isActive()){
+            retransmissionTimer0x40->stop();
+        }
+        if(retransmissionTimer0x43->isActive()){
+            retransmissionTimer0x43->stop();
+        }
+
+        readySend40ChannelList.clear();
+        readySend43ChannelList.clear();
+
+        ui->checkAll_pushButton->setEnabled(true);
+        ui->checkNotAll_pushButton->setEnabled(true);
+    }
+}
+/**
+ *  控制区
+ *  读取按钮点击时
+ */
+void termial::read_clicked(){
+    // 若没连接就点击
+    if(connectionName == "" || connectionName.isEmpty()){
+        if(retransmissionTimer0x41->isActive()){
+            retransmissionTimer0x41->stop();
+        }
+        if(retransmissionTimer0x44->isActive()){
+            retransmissionTimer0x44->stop();
+        }
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        return;
+    }
+    // 判断走TCP还是串口
+    if(ui->read_btn->text() == tr("读取")){
+        ui->read_btn->setText(tr("正在读取.."));
+        if(connectionName == "串口"){
+            readBtn_clicked();
+        }
+        if(connectionName == "TCP"){
+            if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+                return;
+            }
+            tcpReadBtn_clicked();
+        }
+    }else{  // 再次点击终止发送
+        ui->read_btn->setText(tr("读取"));
+        if(retransmissionTimer0x41->isActive()){
+            retransmissionTimer0x41->stop();
+        }
+        if(retransmissionTimer0x44->isActive()){
+            retransmissionTimer0x44->stop();
+        }
+
+        readySend41ChannelList.clear();
+        readySend44ChannelList.clear();
+
+        ui->checkAll_pushButton->setEnabled(true);
+        ui->checkNotAll_pushButton->setEnabled(true);
+    }
 }
 
 /**
@@ -2124,20 +2717,25 @@ void termial::currentSerialport_readyRead(){
         return;
     }
 
-    debug("串口接收到的信息:\n")<<data.toHex(' ');
+    // debug("串口接收到的信息:\n")<<data.toHex(' ');
 
     channel newChannel;
     DMR newDmr;
+    TUNER newTuner;
 
     // 判断数据是否合法
     QByteArray dataPacket;
-    dataPacket = tool.parsePackets(data);
+    // dataPacket = tool.parsePackets(data);
+    dataPacket = tool.parsePacketsPlus(data);   // 保证获取到有效数据包,并将有效数据存到dataPacket,若无有效数据 返回的是""
     if(dataPacket.isEmpty() || dataPacket == ""){
-        debug("此次传输没有收到有效数据");
+        // debug("此次传输没有收到有效数据");
         return;
     }
 
-    debug("判断数据合法性结束");
+
+    if(dataPacket[5]!=0x47){
+        debug("判断数据合法性结束")<<dataPacket.toHex(' ');
+    }
 
     // 判断传回来的是什么命令
     switch(dataPacket[5]){
@@ -2157,6 +2755,18 @@ void termial::currentSerialport_readyRead(){
         newDmr.dataToDMR(dataPacket);
         serialHandleCommand0x44(newDmr);
         break;
+    case 0x46:
+        newTuner.dataToObj0x46(dataPacket);
+        handleCommand0x46(newTuner);
+        break;
+    case 0x47:
+        newTuner.dataToObj0x47(dataPacket);
+        handleCommand0x47(newTuner);
+        break;
+    case 0x48:
+        newTuner.dataToObj0x48(dataPacket);
+        handleCommand0x48(newTuner);
+        break;
     }
 }
 
@@ -2170,13 +2780,9 @@ void termial::sendBtn_clicked(){
     getAllCheckedRowsToList(readySend40ChannelList);
     getAllCheckedRowsToListDmr(readySend43ChannelList);
 
-    if(readySend40ChannelList.isEmpty()){
+    if(readySend40ChannelList.isEmpty() && readySend43ChannelList.isEmpty()){
         debug("没有选中任何行");
-
-        return;
-    }
-    if(readySend43ChannelList.isEmpty()){
-        debug("没有选中任何行");
+        ui->send_btn->setText(tr("发送"));
         return;
     }
 
@@ -2185,8 +2791,8 @@ void termial::sendBtn_clicked(){
     ui->load_progressBar->setMaximum(loadSend);
     ui->load_progressBar->setValue(0);
 
+    // 获取列表中第一个命令,发送后删除对应命令
     serialPortTool.takeFirst43ListWrite(dmrWrite,readySend43ChannelList,currentSerialport);
-    // 获取41列表中第一个命令,发送后删除对应命令
     serialPortTool.takeFirst40ListWrite(channelWrite,readySend40ChannelList,currentSerialport);
 
     ui->checkAll_pushButton->setEnabled(false);
@@ -2237,6 +2843,32 @@ void termial::onTimeout0x44(){
     QByteArray data = dmrRead.buildReadData();
     debug("0x44 超时重发:\n")<<data.toHex(' ');
     currentSerialport.write(data);
+}
+
+/**
+ *  0x47
+ *  天调同步 定时发送
+ */
+void termial::onTimerout0x47(QByteArray data){
+    if(connectionName == "" || connectionName.isEmpty()){
+        QMessageBox::warning(this, tr("警告") , tr("未连接串口或TCP!"));
+        // ui->TUNER_synchronous_pushButton->setText(tr("天调同步"));
+        disconnect(&tuner_v,&TUNER_view::onTimerOut0x47,this,&termial::onTimerout0x47);
+        if(tunerRetransmissionTimer0x47->isActive())
+            tunerRetransmissionTimer0x47->stop();
+        return;
+    }
+
+    if(connectionName == "串口"){
+        currentSerialport.write(data);
+    }
+    if(connectionName == "TCP"){
+        if(tcpSocketList.isEmpty() || tcpSocketList.count() == 0){
+            return;
+        }
+        currentClient = getCurrentClientInfo();
+        currentClient.getSocket()->write(data);
+    }
 }
 
 /**
@@ -2298,4 +2930,13 @@ void termial::vfobComboBoxIndexChanged(int row,int index){
     updateDmrWidgetsState(row);
 }
 
+void termial::showEvent(QShowEvent *event)
+{
+    this->setAttribute(Qt::WA_Mapped);
+    QWidget::showEvent(event);
+
+    QSize oldSize = this->size();
+    resize(oldSize + QSize(10, 10));
+    resize(oldSize);
+}
 

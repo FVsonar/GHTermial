@@ -16,10 +16,13 @@ void TcpTools::takeFirst40ListWrite(channel &channelWrite, QList<channel> &ready
     channelWrite.setCommand(0x40);
     channelWrite.setSize(15+12+2);
 
-    QByteArray firstData = channelWrite.prepareWritePacketWithCRC();
+    // QByteArray firstData = channelWrite.prepareWritePacketWithCRC();
+    QByteArray firstData = channel_service.build0x40(channelWrite);
 
+    debug("40发送数据:")<< firstData.toHex(' ');
     currentClient.getSocket()->write(firstData);
 }
+
 /**
  *  tcp
  *  41读命令
@@ -33,14 +36,12 @@ void TcpTools::takeFirst41ListWrite(channel &channelRead, QList<channel> &readyS
     channelRead.setSize(5);
 
 
-    QByteArray firstData = channelRead.preparePacketWithCRC();
-
+    // QByteArray firstData = channelRead.preparePacketWithCRC();
+    QByteArray firstData = channel_service.build0x41(channelRead);
 
     // 获得当前下拉框选择的IP 端口 客户端套接字
+    debug("41发送数据:")<< firstData.toHex(' ');
     currentClient.getSocket()->write(firstData);    // 发送数据包
-
-
-    debug("发送的数据")<<firstData.toHex(' ');
 }
 
 /**
@@ -52,10 +53,13 @@ void TcpTools::takeFirst43ListWrite(DMR& dmrWrite,QList<DMR> &readySend43Channel
     dmrWrite.setCommand(0x43);
     dmrWrite.setSize(29);
 
-    QByteArray firstData = dmrWrite.buildWriteData();
-    debug("43写命令发送数据:")<< firstData.toHex(' ');
+    // QByteArray firstData = dmrWrite.buildWriteData();
+    QByteArray firstData = dmr_service.build0x43(dmrWrite);
+
+    debug("43发送数据:")<< firstData.toHex(' ');
     currentClient.getSocket()->write(firstData);
 }
+
 /**
  *  tcp
  *  44读命令
@@ -70,8 +74,9 @@ void TcpTools::takeFirst44ListWrite(DMR& dmrRead,QList<DMR> &readySend44ChannelL
     dmrRead.setChannelHigh(dmrRead.getChannelHigh());
     dmrRead.setChannelLow(dmrRead.getChannelLow());
 
-    QByteArray firstDataDmr = dmrRead.buildReadData();
+    // QByteArray firstDataDmr = dmrRead.buildReadData();
+    QByteArray firstDataDmr = dmr_service.build0x44(dmrRead);
 
-    debug("44读命令发送数据:")<< firstDataDmr.toHex(' ');
+    debug("44发送数据:")<< firstDataDmr.toHex(' ');
     currentClient.getSocket()->write(firstDataDmr); // 发送DMR数据包
 }

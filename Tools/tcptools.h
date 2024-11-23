@@ -6,12 +6,16 @@
 #include "Entity/channel.h"
 #include "Entity/dmr.h"
 #include "clientinfo.h"
+#include "Service/channel_service.h"
+#include "Service/dmr_service.h"
 
-#define debug(x) qDebug()<<"TcpTools:["<<__LINE__<<"]"<<__FUNCTION__<<"()"<<x
 
 class TcpTools : public QObject
 {
     Q_OBJECT
+private:
+    Channel_Service channel_service;
+    Dmr_Service dmr_service;
 public:
     explicit TcpTools(QObject *parent = nullptr);
 

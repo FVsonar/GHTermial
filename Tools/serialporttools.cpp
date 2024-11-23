@@ -1,5 +1,6 @@
 #include "Tools/serialporttools.h"
 
+
 SerialPort::SerialPort(QObject *parent)
     : QObject{parent}
 {}
@@ -46,7 +47,8 @@ void SerialPort::takeFirst40ListWrite(channel &channelWrite,QList<channel> &read
     channelWrite.setCommand(0x40);
     channelWrite.setSize(15+12+2);
 
-    QByteArray firstData = channelWrite.prepareWritePacketWithCRC();
+    // QByteArray firstData = channelWrite.prepareWritePacketWithCRC();
+    QByteArray firstData = channel_service.build0x40(channelWrite);
 
     currentSerialport.write(firstData);
 }
@@ -59,7 +61,8 @@ void SerialPort::takeFirst41ListWrite(channel &channelRead,QList<channel> &ready
     channelRead.setCommand(0x41);
     channelRead.setSize(5);
 
-    QByteArray firstData = channelRead.preparePacketWithCRC();
+    // QByteArray firstData = channelRead.preparePacketWithCRC();
+    QByteArray firstData = channel_service.build0x41(channelRead);
 
     currentSerialport.write(firstData);
 }
@@ -73,7 +76,8 @@ void SerialPort::takeFirst43ListWrite(DMR &dmrWrite, QList<DMR> &readySend44Chan
     dmrWrite.setCommand(0x43);
     dmrWrite.setSize(29);
 
-    QByteArray firstData = dmrWrite.buildWriteData();
+    // QByteArray firstData = dmrWrite.buildWriteData();
+    QByteArray firstData = dmr_service.build0x43(dmrWrite);
     debug("发送的数据")<<firstData.toHex(' ');
     currentSerialpor.write(firstData);
 }
@@ -88,7 +92,8 @@ void SerialPort::takeFirst44ListWrite(DMR &dmrRead, QList<DMR> &readySend44Chann
     dmrRead.setCommand(0x44);
     dmrRead.setSize(5);
 
-    QByteArray firstData = dmrRead.buildReadData();
+    // QByteArray firstData = dmrRead.buildReadData();
+    QByteArray firstData = dmr_service.build0x44(dmrRead);
     debug("发送的数据")<<firstData.toHex(' ');
     currentSerialport.write(firstData);
 }

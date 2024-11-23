@@ -9,25 +9,43 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    DAO/channel_dao.cpp \
+    DAO/channeldmr_dao.cpp \
+    DAO/dmr_dao.cpp \
+    DAO/tuner_dao.cpp \
     Entity/channel.cpp \
     Entity/channeldmr.cpp \
     Entity/dmr.cpp \
+    Entity/tuner.cpp \
+    Service/channel_service.cpp \
+    Service/dmr_service.cpp \
+    Service/tuner_service.cpp \
     Tools/serialporttools.cpp \
     Tools/tcptools.cpp \
     Tools/tools.cpp \
     clientinfo.cpp \
     main.cpp \
-    termial.cpp
+    termial.cpp \
+    view/tuner_view.cpp
 
 HEADERS += \
+    DAO/channel_dao.h \
+    DAO/channeldmr_dao.h \
+    DAO/dmr_dao.h \
+    DAO/tuner_dao.h \
     Entity/channel.h \
     Entity/channeldmr.h \
     Entity/dmr.h \
+    Entity/tuner.h \
+    Service/channel_service.h \
+    Service/dmr_service.h \
+    Service/tuner_service.h \
     Tools/serialporttools.h \
     Tools/tcptools.h \
     Tools/tools.h \
     clientinfo.h \
-    termial.h
+    termial.h \
+    view/tuner_view.h
 
 FORMS += \
     termial.ui
@@ -54,3 +72,6 @@ RESOURCES += \
     language.qrc
 
 RC_ICONS = GHTermial.ico
+
+DISTFILES += \
+    view/新建 文本文档.txt

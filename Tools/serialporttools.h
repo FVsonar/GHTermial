@@ -7,8 +7,8 @@
 
 #include "Entity/channel.h"
 #include "Entity/dmr.h"
-
-#define debug(x) qDebug()<<"SerialPortTools:["<<__LINE__<<"]"<<__FUNCTION__<<"()"<<x
+#include "Service/channel_service.h"
+#include "Service/dmr_service.h"
 
 class SerialPort : public QObject
 {
@@ -30,7 +30,8 @@ public:
 
     bool serialPortReadyRead(QByteArray &data, channel &lastChannel, QSerialPort &currentSerialport);
 private:
-
+    Channel_Service channel_service;
+    Dmr_Service dmr_service;
 
 
 signals:

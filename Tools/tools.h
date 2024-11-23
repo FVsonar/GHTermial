@@ -21,6 +21,9 @@ public:
     QByteArray parsePackets(QByteArray data);
     bool saveJsonToFile(const QJsonObject &obj, const QString &filePath);
     void setRxTxCtcssComboBoxPtr(QComboBox *&comboBox);
+    QByteArray parsePacketsPlus(QByteArray data);
+    void addCrc(QByteArray &data);
+    void addHead(QByteArray &data);
 signals:
 
 private:

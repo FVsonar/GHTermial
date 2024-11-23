@@ -23,12 +23,27 @@
 #include <QTranslator>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrentRun>
+#include <QButtonGroup>
+#include <QMessageBox>
 
 #include "Entity/channel.h"
-#include "Tools/serialporttools.h"
-#include "clientinfo.h"
-#include "Tools/tcptools.h"
 #include "Entity/dmr.h"
+#include "Entity/tuner.h"
+
+#include "Tools/serialporttools.h"
+#include "Tools/tcptools.h"
+
+#include "Service/channel_service.h"
+#include "Service/dmr_service.h"
+#include "Service/tuner_service.h"
+
+#include "DAO/tuner_dao.h"
+#include "DAO/channel_dao.h"
+#include "DAO/channeldmr_dao.h"
+#include "DAO/dmr_dao.h"
+
+#include "view/tuner_view.h"
+#include "clientinfo.h"
 
 
 #define debug(x) qDebug().noquote()<<QTime::currentTime()<<"termial:["<<__LINE__<<"]"<<__FUNCTION__<<"()"<<x
@@ -51,6 +66,10 @@ public:
     const int HOW_LONG_HEARTBEAT = 8000; // 多久发一次心跳包
     const int MAX_TIMEOUT_MUN = 3;
     int currentErrorMun = 0;
+    QString connectionName;  // 储存是TCP连接还是串口连接
+
+    bool tunerSend(QByteArray data);
+signals:
 
 
 public slots:
@@ -79,8 +98,6 @@ public slots:
     void tcpOnTimeout0x40();
     void tcpOnTimeout0x41();
 
-
-
     void heartbeat_outtime();
     void onTimeout0x44();
     void onTimeout0x43();
@@ -89,13 +106,49 @@ public slots:
     // void scanSerialPort_timeout();
     void serialportFlashBtn_clicked();
 
+    void tabWidgetSwitch(int index);
+private slots:
+    void swtBtn_clicked();
+    void TUNER_synchronousBtn_clicked();
+    void ATCbtn_clicked();
+    void onTimerout0x47(QByteArray data);
+    void send_clicked();
+    void read_clicked();
+    void tunerOnTimer0x46();
+    void tunerOnTimer0x47();
+    void tunerOnTimer0x48();
+    void swcHorizontalSlier_valueChanged(int value);
+    void ppcHorizontalSlier_valueChanged(int value);
+    void vcHorizontalSlier_valueChanged(int value);
+    void vcvSpinBox_valueChanged(int value);
+    void swcvSpinBox_valueChanged(int value);
+    void ppcvSpinBox_valueChanged(int value);
+    // void swtDial_valueChanged(int value);
+    void swtDial_valueChanged(int value);
+    void swtDoubleSpinBox_valueChanged(double value);
 private:
     Ui::termial *ui;
+
     Tools tool;
     SerialPort serialPortTool;
     TcpTools tcpTools;
 
+    Channel_Service channel_service;
+    Dmr_Service dmr_service;
+    TUNER_service tuner_service;
+
+    Channel_DAO channel_dao;
+    Dmr_DAO dmr_dao;
+    TUNER_DAO tuner_dao;
+
+    TUNER_view tuner_v;
+
     QTranslator translator; // 翻译
+
+    QString currentPage;    // 当前所在页名称,可当pageIndex使用
+
+    /* 天调 */
+    QButtonGroup* swtBtnGroup; // 驻波协调单选组
 
     /* 串口定时器 超时重发 */
     QTimer *retransmissionTimer0x40;   // 0x40
@@ -107,6 +160,10 @@ private:
     QTimer *tcpRetransmissionTimer0x41;
     QTimer *tcpRetransmissionTimer0x43;
     QTimer *tcpRetransmissionTimer0x44;
+    /* 天调定时器 超时重发 */
+    QTimer * tunerRetransmissionTimer0x46;
+    QTimer * tunerRetransmissionTimer0x47;
+    QTimer * tunerRetransmissionTimer0x48;
 
     QTimer *heartbeatTimer; // 心跳包定时器 超时发送心跳包
 
@@ -167,6 +224,7 @@ private:
     void initConnect();
     void initLanguageComboBox();
     void initArt();
+    void initTunerSwtRadioBtn();    // 初始化天调驻波调谐 单选框
 
     /* vfo 模式发生改变 */
     void vfoaComboBoxIndexChanged(int row, int index);
@@ -295,5 +353,9 @@ private:
     */
     void loadLanguageAsync(const QString &langName);
 
+    void handleCommand0x46(TUNER newTuner);
+    void handleCommand0x47(TUNER newTuner);
+    void handleCommand0x48(TUNER newTuner);
+    void showEvent(QShowEvent *event);
 };
 #endif // TERMIAL_H

@@ -135,11 +135,11 @@ QByteArray Tools::parsePackets(QByteArray data) {
     //包头位置
     int phIndex =  data.indexOf("\xA5\xA5\xA5\xA5");
     if(phIndex == -1){
-        qDebug()<<"没找到包头";
+        // qDebug()<<"没找到包头"<<data.toHex(' ');
         return newData;
     }
     if(data.size()<phIndex+5){
-        qDebug("没有包长");
+        // qDebug()<<"没有包长"<<data.toHex(' ');
         return newData;
     }
 
@@ -151,15 +151,74 @@ QByteArray Tools::parsePackets(QByteArray data) {
     int pkpl = 5+pl;
 
     if(data.size() < phIndex + pkpl){
-        qDebug("包长度不对");
+        // qDebug()<<"包长度不对"<<data.toHex(' ');
         return newData;
     }
 
     newData = data.mid(phIndex,phIndex+pkpl);
     if(!compareCRC(newData)){
-        qDebug()<<"crc校验失败";
+        // qDebug()<<"crc校验失败"<<data.toHex(' ');
     }
     return newData;
+}
+
+/**
+ *  当数据分段到达时 使用此方法获得完整数据
+ */
+QByteArray Tools::parsePacketsPlus(QByteArray data){
+    // 将新接收到的数据添加到缓冲区
+    buffer.append(data);
+
+    QByteArray newData = "";
+
+    while (true) {
+        // 查找包头位置
+        int phIndex = buffer.indexOf("\xA5\xA5\xA5\xA5");
+        if (phIndex == -1) {
+            // qDebug() << "没找到包头" << buffer.toHex(' ');
+            break;
+        }
+
+        // 如果包头后面的数据不足，则继续等待更多数据
+        if (buffer.size() < phIndex + 5) {
+            // qDebug() << "没有包长" << buffer.toHex(' ');
+            break;
+        }
+
+        // 包长位置
+        int plIndex = phIndex + 4;
+        // 包长
+        int pl = buffer[plIndex];
+        // 包含包头和本身的包长
+        int pkpl = 5 + pl;
+
+        // 如果数据不足以构成一个完整的数据包，则继续等待更多数据
+        if (buffer.size() < phIndex + pkpl) {
+            // qDebug() << "包长度不够,数据可能是分段到达" << buffer.toHex(' ');
+            break;
+        }
+
+        // 提取完整的数据包
+        newData = buffer.mid(phIndex, pkpl);
+
+        // 校验CRC
+        if (!compareCRC(newData)) {
+            // qDebug() << "crc校验失败" << buffer.toHex(' ');
+            // 如果CRC校验失败，可以选择丢弃当前数据包并继续处理剩余数据
+            buffer.remove(0, pkpl);
+            continue;
+        }
+
+        // 移除已处理的数据包
+        buffer.remove(0, pkpl);
+
+        if(newData[5]!=0x47){
+            qDebug()<<"返回解析出来的数据包:"<<newData.toHex(' ');
+        }
+        // 返回解析出来的数据包
+        return newData;
+    }
+    return "";
 }
 
 /**
@@ -346,4 +405,27 @@ bool Tools::saveJsonToFile(const QJsonObject& obj,const QString& filePath){
         return true;
     }
     return false;
+}
+
+/**
+ *  给data添加CRC
+ */
+void Tools::addCrc(QByteArray &data)
+{
+    // 计算CRC CRC校验不含包头不含自身
+    uint16_t crc = CRC16Check(reinterpret_cast<unsigned char*>(data.data()), data.size());
+
+    // 将CRC高低位分开加入到data中
+    data.append((crc >> 8) & 0xFF); // CRC高
+    data.append(crc & 0xFF);        // CRC低
+}
+/**
+ *  给data添加包头
+ */
+void Tools::addHead(QByteArray &data)
+{
+    data.prepend(0xa5);
+    data.prepend(0xa5);
+    data.prepend(0xa5);
+    data.prepend(0xa5);
 }
