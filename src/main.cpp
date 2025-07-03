@@ -27,6 +27,11 @@
 #include <QStyleFactory>
 #include <QQmlApplicationEngine>
 #include <QTranslator>
+#include <QMessageBox>
+#include <QDir>
+#include <QStandardPaths>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 
 #include <AppInfo.h>
 #include <Misc/Utilities.h>
@@ -38,10 +43,18 @@
 #include "Dataproc.h"
 #include "qmllanguge.h"
 #include "autoconn.h"
+#include "core/application.h"
+#include "widgets/main_window.h"
+#include "models/channel_model.h"
+#include "services/serial_service.h"
+#include "core/config_manager.h"
+#include "core/logger.h"
 
 #ifdef Q_OS_WIN
 #    include <windows.h>
 #endif
+
+using namespace GHTerminal;
 
 /**
  * @brief Entry-point function of the application
@@ -51,7 +64,7 @@
  *
  * @return qApp exit code
  */
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     // Fix console output on Windows (https://stackoverflow.com/a/41701133)
     // This code will only execute if the application is started from the comamnd prompt
@@ -75,13 +88,32 @@ int main(int argc, char **argv)
   // QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
 //#endif
     // Init. application
-    QApplication app(argc, argv);
-    app.setApplicationName(APP_NAME);
-    app.setApplicationVersion(APP_VERSION);
-    app.setOrganizationName(APP_DEVELOPER);
-    app.setOrganizationDomain(APP_SUPPORT_URL);
+    Application app(argc, argv);
+    app.setApplicationName("GHTerminal");
+    app.setApplicationVersion("1.0.0");
+    app.setOrganizationName("FVsonar");
+    app.setOrganizationDomain("fvsonar.github.io");
     app.setStyle(QStyleFactory::create("Fusion"));
 
+    // 命令行参数解析
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Qt串口终端工具 - Q900系列电台通信配置工具");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    
+    QCommandLineOption configOption(QStringList() << "c" << "config",
+                                   "指定配置文件路径", "config-file");
+    parser.addOption(configOption);
+    
+    QCommandLineOption logOption(QStringList() << "l" << "log",
+                                "指定日志文件路径", "log-file");
+    parser.addOption(logOption);
+    
+    QCommandLineOption verboseOption(QStringList() << "v" << "verbose",
+                                    "启用详细日志输出");
+    parser.addOption(verboseOption);
+    
+    parser.process(app);
 
     // Init application modules
     QQmlApplicationEngine engine;
@@ -91,7 +123,6 @@ int main(int argc, char **argv)
     auto fileTransmission = Serial::FileTransmission::getInstance();
     auto dataProc = DataProc::getInstance();
 
-
     JsonUtils jsonUtils;
     AutoConn autoConn;
 
@@ -100,7 +131,6 @@ int main(int argc, char **argv)
 
     // Configure dark UI
     Misc::Utilities::configureDarkUi();
-
 
     //切换为本地语言
     //检测本系统语言自动装载翻译文件
@@ -120,8 +150,6 @@ int main(int argc, char **argv)
     //将QmlLanguage中的所有函数暴露给qml调用
     QmlLanguage qmlLanguage(app, engine);
     engine.rootContext()->setContextProperty("qmlLanguage", &qmlLanguage);
-
-
 
     // Init QML interface
     auto c = engine.rootContext();
@@ -145,6 +173,51 @@ int main(int argc, char **argv)
     if (engine.rootObjects().isEmpty())
         return EXIT_FAILURE;
 
-    // Enter application event loop
-    return app.exec();
+    // 初始化应用程序
+    if (!app.initialize()) {
+        QMessageBox::critical(nullptr, "错误", "应用程序初始化失败！");
+        return -1;
+    }
+    
+    // 获取日志管理器
+    Logger *logger = app.logger();
+    if (logger) {
+        logger->info("GHTerminal 启动", "Main");
+    }
+    
+    // 创建主窗口
+    MainWindow mainWindow;
+    
+    // 创建核心组件
+    auto configManager = std::make_unique<ConfigManager>(&mainWindow);
+    auto serialService = std::make_unique<SerialService>(&mainWindow);
+    auto channelModel = std::make_unique<ChannelModel>(&mainWindow);
+    
+    // 设置主窗口组件
+    mainWindow.setConfigManager(configManager.get());
+    mainWindow.setSerialService(serialService.get());
+    mainWindow.setChannelModel(channelModel.get());
+    mainWindow.setLogger(logger);
+    
+    // 初始化主窗口
+    if (!mainWindow.initialize()) {
+        QMessageBox::critical(&mainWindow, "错误", "主窗口初始化失败！");
+        return -1;
+    }
+    
+    // 显示主窗口
+    mainWindow.show();
+    
+    if (logger) {
+        logger->info("主窗口已显示", "Main");
+    }
+    
+    // 运行应用程序
+    int result = app.exec();
+    
+    if (logger) {
+        logger->info("GHTerminal 退出", "Main");
+    }
+    
+    return result;
 }

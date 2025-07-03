@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/icon.ico</file>
+        <file>images/connect.png</file>
+        <file>images/disconnect.png</file>
+        <file>images/read.png</file>
+        <file>images/write.png</file>
+        <file>images/settings.png</file>
+        <file>images/new.png</file>
+        <file>images/open.png</file>
+        <file>images/save.png</file>
+        <file>images/export.png</file>
+        <file>images/import.png</file>
+        <file>images/help.png</file>
+        <file>images/about.png</file>
+        <file>images/terminal.png</file>
+        <file>images/calculator.png</file>
+        <file>images/refresh.png</file>
+        <file>images/close.png</file>
+        <file>images/maximize.png</file>
+        <file>images/minimize.png</file>
+        <file>images/up.png</file>
+        <file>images/down.png</file>
+        <file>images/flash.png</file>
+        <file>images/openJson.png</file>
+        <file>images/readJson.png</file>
+        <file>images/saveJson.png</file>
+        <file>styles/dark.qss</file>
+        <file>styles/light.qss</file>
+        <file>styles/fusion.qss</file>
+    </qresource>
+</RCC> 
