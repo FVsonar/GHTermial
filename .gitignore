@@ -1,4 +1,3 @@
-
 # General
 .DS_Store
 .AppleDouble
@@ -28,10 +27,143 @@ Temporary Items
 
 # Qt project file
 *.pro.user
+*.pro.user.*
+*.qmake.stash
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+*.qm
+*.ts
+*.qmlc
+*.jsc
 
 # VSCode
 .vscode/
 .idea/
 
 ./history
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build directories
+build/
+debug/
+release/
+bin/
+obj/
+
+# Qt Creator
+*.autosave
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# Resource files (keep only source)
+*.rc
+!*.rc
+
+# Windows specific
+*.lnk
+*.pif
+*.scr
+*.url
+
+# Qt deployment
+*.dmg
+*.deb
+*.rpm
+*.msi
+*.exe
+
+# Documentation build
+doc/build/
+docs/_build/
+
+# Test files
+test_*
+*_test
+*.test
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+
+# Profiling files
+*.prof
+*.gprof
+
+# Package files
+*.7z
+*.zip
+*.tar.gz
+*.rar
+
+# Large binary files
+*.bin
+*.dat
+*.db
+
+# Local configuration
+config.ini
+settings.ini
+*.conf
 
