@@ -41,7 +41,8 @@
 #include "DAO/channel_dao.h"
 #include "DAO/dmr_dao.h"
 
-
+#include "Service/SerialPortManager.h"
+#include "Service/SerialCommandManager.h"
 
 #ifndef debug
 #define debug(x) qDebug().noquote()<<QTime::currentTime()<<"termial:["<<__LINE__<<"]"<<__FUNCTION__<<"()"<<x
@@ -95,12 +96,8 @@ protected:
 public slots:
     void serialportComboBox_currentIndexChanged(int index);    // 当串口选择下拉框发生变化时
     void serialportLinkBtn_clicked();   // 当连接按钮被点击时
-    void currentSerialport_readyRead();
     void readBtn_clicked();
     void sendBtn_clicked();
-
-    void onTimeout0x40();
-    void onTimeout0x41();
 
     void checkAllBtn_clicked();
     void saveBtn_clicked();
@@ -109,9 +106,6 @@ public slots:
     // void scanSerialPort_timeout();
     void checkAllNotBtn_clicked();
     // void scanNetworkInterfaces();
-
-    void onTimeout0x44();
-    void onTimeout0x43();
 
     // void scanSerialPort_timeout();
     void serialportFlashBtn_clicked();
@@ -148,16 +142,7 @@ public:
     bool readBtn_busy;  // 读取按钮的状态 是否正在读取 在：true 不在：false
     bool sendBtn_busy;  // 发送按钮的状态 是否正在发送 在：true 不在：false
 
-    /* 串口定时器 超时重发 */
-    QTimer *retransmissionTimer0x40;   // 0x40
-    QTimer *retransmissionTimer0x41;    // 0x41
-    QTimer *retransmissionTimer0x43;    // 0x43
-    QTimer *retransmissionTimer0x44;    // 0x44
 
-    int retryCount0x40 = 0;  // 0x40命令重试计数器
-    int retryCount0x41 = 0;  // 0x41命令重试计数器
-    int retryCount0x43 = 0;  // 0x43命令重试计数器
-    int retryCount0x44 = 0;  // 0x44命令重试计数器
 
     channel channelWrite;   // 0x40 信道数据对象
     channel channelRead;    // 0x41 信道数据对象
@@ -175,7 +160,6 @@ public:
     QList<QSerialPortInfo> serialPortList;      // 所有串口QSerialPortInfo对象的列表
     QList<QSerialPortInfo> loadSerialPortList;  // 上次的串口列表
     QSerialPortInfo currentSerialportInfo;      // 串口下拉框当前选中的QSerialPortInfo对象
-    QSerialPort currentSerialport;              // 当前使用的串口
 
     /* 状态 */
     bool isAllSet=false;                    // 是否全选 -1全不选 0有选
@@ -331,5 +315,9 @@ public:
 
     void resetOperationState();
     void clearAllCommandLists();
+
+private:
+    SerialPortManager* serialPortManager = nullptr;
+    SerialCommandManager* serialCommandManager = nullptr;
 };
 #endif // TERMIAL_H

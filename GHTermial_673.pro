@@ -23,6 +23,8 @@ SOURCES += \
     Entity/stlip.cpp \
     Service/channel_service.cpp \
     Service/dmr_service.cpp \
+    Service/SerialPortManager.cpp \
+    Service/SerialCommandManager.cpp \
     Tools/serialporttools.cpp \
     Tools/tools.cpp \
     main.cpp \
@@ -43,6 +45,8 @@ HEADERS += \
     Entity/stlip.h \
     Service/channel_service.h \
     Service/dmr_service.h \
+    Service/SerialPortManager.h \
+    Service/SerialCommandManager.h \
     Tools/serialporttools.h \
     Tools/tools.h \
     termial.h

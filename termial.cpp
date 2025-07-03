@@ -3,6 +3,7 @@
 // #include "CheckBoxUpdater.h"
 #include "Entity/channeldmr.h"
 #include <QMessageBox>
+#include "Service/SerialPortManager.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -15,11 +16,9 @@ void setDTRRTS(HANDLE hPort, bool dtr, bool rts) {
 termial::termial(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::termial)
-    , retransmissionTimer0x40(new QTimer(this))
-    , retransmissionTimer0x41(new QTimer(this))
-    , retransmissionTimer0x43(new QTimer(this))
-    , retransmissionTimer0x44(new QTimer(this))
     , model(new QStandardItemModel(this))
+    , serialPortManager(new SerialPortManager(this))
+    , serialCommandManager(new SerialCommandManager(serialPortManager, this))
 {
     ui->setupUi(this);
 
@@ -42,6 +41,58 @@ termial::termial(QWidget *parent)
     initConnect();  // 信号and槽初始化
     switchLanguage(0);
     ui->channelMaxNum_spinBox->setValue(10);
+
+    connect(serialPortManager, &SerialPortManager::dataReceived, this, [this](const QByteArray &data) {
+        // 迁移原有的currentSerialport_readyRead逻辑
+        if(data.isEmpty()){
+            debug("没有读取到任何数据，但触发了串口有数据可读?");
+            return;
+        }
+
+        channel newChannel;
+        DMR newDmr;
+
+        // 判断数据是否合法
+        QByteArray dataPacket;
+        dataPacket = tool.parsePacketsPlus(data);   // 保证获取到有效数据包,并将有效数据存到dataPacket,若无有效数据 返回的是""
+        if(dataPacket.isEmpty() || dataPacket == ""){
+            return;
+        }
+
+        if(static_cast<unsigned char>(dataPacket[5])!=0x47){
+            debug("判断数据合法性结束\n\t")<<dataPacket.toHex(' ');
+        }
+
+        // 判断传回来的是什么命令
+        switch(dataPacket[5]){
+        case 0x40:
+            newChannel.radioWriteResponseToObj(dataPacket); // 将dataPacket转化为Channel对象
+            serialHandleCommand0x40(newChannel);    //
+            break;
+        case 0x41:
+            newChannel.radioReadResponseToObj(dataPacket);
+            serialHandleCommand0x41(newChannel);
+            break;
+        case 0x43:
+            newDmr.dataToDMR(dataPacket);
+            serialHandleCommand0x43(newDmr);
+            break;
+        case 0x44:
+            newDmr.dataToDMR(dataPacket);
+            debug("0x44chTypes - ")<<(int)dataPacket[20];
+            serialHandleCommand0x44(newDmr);
+            break;
+        }
+    });
+    connect(serialPortManager, &SerialPortManager::errorOccurred, this, [](const QString &err) {
+        QDebug(QtDebugMsg) << "串口错误:" << err;
+    });
+    connect(serialPortManager, &SerialPortManager::portOpened, this, []() {
+        QDebug(QtDebugMsg) << "串口已打开";
+    });
+    connect(serialPortManager, &SerialPortManager::portClosed, this, []() {
+        QDebug(QtDebugMsg) << "串口已关闭";
+    });
 }
 
 // 清理函数
@@ -52,10 +103,10 @@ void termial::clearAllCommandLists() {
     readySend44ChannelList->clear();
 
     // 重置所有重试计数器
-    retryCount0x40 = 0;
-    retryCount0x41 = 0;
-    retryCount0x43 = 0;
-    retryCount0x44 = 0;
+    serialCommandManager->resetRetryCount(0x40);
+    serialCommandManager->resetRetryCount(0x41);
+    serialCommandManager->resetRetryCount(0x43);
+    serialCommandManager->resetRetryCount(0x44);
 }
 /**
  *  重置按钮UI
@@ -67,15 +118,7 @@ void termial::resetOperationState() {
     ui->checkNotAll_pushButton->setEnabled(true);
 }
 
-/**
- *  用于停止定时器
- *  例子：调用方法stopTimerSafe(timer0x40);
- */
-inline void stopTimerSafe(QTimer* timer) {
-    if(timer && timer->isActive()) {
-        timer->stop();
-    }
-}
+
 
 /**
  *  UI
@@ -109,17 +152,14 @@ void termial::loadLanguageAsync(const QString &langName) {
  */
 void termial::serialportLinkBtn_clicked(){
     if(serialportLinkBtn_state == false){   // 未连接状态时点击
-        serialPortTool.initSerialport(currentSerialportInfo,currentSerialport);  // 初始化串口连接
-        // 打开串口
-        if(!currentSerialport.open(QIODevice::ReadWrite)){
-            debug("没有成功打开串口")<< currentSerialport.errorString();
-            QMessageBox::warning(this, tr("警告") , tr("没有成功打开串口,") + currentSerialport.errorString());
+        // 使用SerialPortManager打开串口
+        if(!serialPortManager->openPort(currentSerialportInfo)){
+            QMessageBox::warning(this, tr("警告") , tr("没有成功打开串口"));
             return;
         }
 
-
-        debug("连接 DTR: ")<<currentSerialport.isDataTerminalReady();
-        debug("连接 RTS: ")<<currentSerialport.isRequestToSend();
+        debug("连接 DTR: ")<<serialPortManager->getSerialPort()->isDataTerminalReady();
+        debug("连接 RTS: ")<<serialPortManager->getSerialPort()->isRequestToSend();
 
         ui->save_pushButton->setEnabled(true);
         ui->open_pushButton->setEnabled(true);
@@ -132,17 +172,11 @@ void termial::serialportLinkBtn_clicked(){
         connectionName = "串口";
         ui->language_comboBox->setEnabled(false);   // 语言框不可在连接状态下更改，不然会出bug
     }else{
-        if (currentSerialport.isOpen()) {
-            // currentSerialport.setRequestToSend(true);
-            // currentSerialport.setDataTerminalReady(true);
-            // currentSerialport.flush();
-            currentSerialport.close();
-        }
+        // 使用SerialPortManager关闭串口
+        serialPortManager->closePort();
+        
         // 取消定时器
-        stopTimerSafe(retransmissionTimer0x40);
-        stopTimerSafe(retransmissionTimer0x41);
-        stopTimerSafe(retransmissionTimer0x43);
-        stopTimerSafe(retransmissionTimer0x44);
+        serialCommandManager->stopAllTimers();
 
         ui->save_pushButton->setEnabled(false);
         ui->open_pushButton->setEnabled(false);
@@ -157,7 +191,6 @@ void termial::serialportLinkBtn_clicked(){
         ui->language_comboBox->setEnabled(true);
     }
     serialportLinkBtn_state = !serialportLinkBtn_state; // 点击后更改按钮状态
-
 }
 
 /**
@@ -213,55 +246,7 @@ void termial::initSerialportComboBox(){
     debug(currentSerialportInfo.portName());
 }
 
-/**
- *  串口
-*   当串口有数据可读时
-*/
-void termial::currentSerialport_readyRead(){
 
-    QByteArray data = currentSerialport.readAll();
-    if(data.isEmpty()){
-        debug("没有读取到任何数据，但触发了串口有数据可读?");
-        return;
-    }
-
-    channel newChannel;
-    DMR newDmr;
-
-    // 判断数据是否合法
-    QByteArray dataPacket;
-    // dataPacket = tool.parsePackets(data);
-    dataPacket = tool.parsePacketsPlus(data);   // 保证获取到有效数据包,并将有效数据存到dataPacket,若无有效数据 返回的是""
-    if(dataPacket.isEmpty() || dataPacket == ""){
-        return;
-    }
-
-
-    if(static_cast<unsigned char>(dataPacket[5])!=0x47){
-        debug("判断数据合法性结束\n\t")<<dataPacket.toHex(' ');
-    }
-
-    // 判断传回来的是什么命令
-    switch(dataPacket[5]){
-    case 0x40:
-        newChannel.radioWriteResponseToObj(dataPacket); // 将dataPacket转化为Channel对象
-        serialHandleCommand0x40(newChannel);    //
-        break;
-    case 0x41:
-        newChannel.radioReadResponseToObj(dataPacket);
-        serialHandleCommand0x41(newChannel);
-        break;
-    case 0x43:
-        newDmr.dataToDMR(dataPacket);
-        serialHandleCommand0x43(newDmr);
-        break;
-    case 0x44:
-        newDmr.dataToDMR(dataPacket);
-        debug("0x44chTypes - ")<<(int)dataPacket[20];
-        serialHandleCommand0x44(newDmr);
-        break;
-    }
-}
 
 /**
  *  串口
@@ -269,17 +254,19 @@ void termial::currentSerialport_readyRead(){
  *  channel写
  */
 void termial::serialHandleCommand0x40(channel& /*newChannel*/){
-    retryCount0x40 = 0;  // 收到响应，重置计数器
+    serialCommandManager->resetRetryCount(0x40);  // 收到响应，重置计数器
     // 关闭定时器
-    stopTimerSafe(retransmissionTimer0x40);
+    serialCommandManager->stopAllTimers();
 
     ui->load_progressBar->setValue(ui->load_progressBar->value()+1);
 
     // 检查是否还有待发送命令
     if(!readySend40ChannelList->isEmpty()){
         // 获取下一个命令
-        serialPortTool.takeFirst40ListWrite(channelWrite,readySend40ChannelList,currentSerialport);
-        retransmissionTimer0x40->start(200);
+        serialPortTool.takeFirst40ListWrite(channelWrite,readySend40ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = channelWrite.prepareWritePacketWithCRC();
+        serialCommandManager->sendCommand(data, 0x40, [](){});
     } else {
         // 所有命令发送完成
         debug("0x40 写操作命令全部发送完成");
@@ -288,8 +275,10 @@ void termial::serialHandleCommand0x40(channel& /*newChannel*/){
         readySend40ChannelList->clear();
 
         if(readySend40ChannelList->isEmpty() && !readySend43ChannelList->isEmpty()){
-            serialPortTool.takeFirst43ListWrite(dmrWrite,readySend43ChannelList,currentSerialport);
-            retransmissionTimer0x43->start(200);
+            serialPortTool.takeFirst43ListWrite(dmrWrite,readySend43ChannelList,*serialPortManager->getSerialPort());
+            // 使用SerialCommandManager发送命令
+            QByteArray data = dmrWrite.buildWriteData();
+            serialCommandManager->sendCommand(data, 0x43, [](){});
         }
     }
 }
@@ -300,17 +289,19 @@ void termial::serialHandleCommand0x40(channel& /*newChannel*/){
  *  channel读
  */
 void termial::serialHandleCommand0x41(channel& newChannel){
-    retryCount0x41 = 0;
+    serialCommandManager->resetRetryCount(0x41);
     viewUpdate(newChannel.getChannelID(),newChannel);
 
-    stopTimerSafe(retransmissionTimer0x41);
+    serialCommandManager->stopAllTimers();
 
     ui->load_progressBar->setValue(ui->load_progressBar->value()+1);
 
     if(!readySend41ChannelList->isEmpty()){
         // 获取下一个命令
-        serialPortTool.takeFirst41ListWrite(channelRead,readySend41ChannelList,currentSerialport);
-        retransmissionTimer0x41->start(200);
+        serialPortTool.takeFirst41ListWrite(channelRead,readySend41ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = channelRead.preparePacketWithCRC();
+        serialCommandManager->sendCommand(data, 0x41, [](){});
     } else {
         // 所有命令发送完成
         debug("0x41 读操作命令全部发送完成");
@@ -320,8 +311,10 @@ void termial::serialHandleCommand0x41(channel& newChannel){
 
         // 只有在处理完所有0x41命令后才开始0x44命令
         if(readySend41ChannelList->isEmpty() && !readySend44ChannelList->isEmpty()){
-            serialPortTool.takeFirst44ListWrite(dmrRead,readySend44ChannelList,currentSerialport);
-            retransmissionTimer0x44->start(200);
+            serialPortTool.takeFirst44ListWrite(dmrRead,readySend44ChannelList,*serialPortManager->getSerialPort());
+            // 使用SerialCommandManager发送命令
+            QByteArray data = dmrRead.buildReadData();
+            serialCommandManager->sendCommand(data, 0x44, [](){});
         }
     }
 }
@@ -332,16 +325,18 @@ void termial::serialHandleCommand0x41(channel& newChannel){
  *  DMR写
  */
 void termial::serialHandleCommand0x43(DMR& /*newDmr*/){
-    retryCount0x43 = 0;
-    stopTimerSafe(retransmissionTimer0x43);
+    serialCommandManager->resetRetryCount(0x43);
+    serialCommandManager->stopAllTimers();
 
     // 更新进度条
     ui->load_progressBar->setValue(ui->load_progressBar->value()+1);
 
     if(!readySend43ChannelList->isEmpty()){
         // 获取下一个命令
-        serialPortTool.takeFirst43ListWrite(dmrWrite,readySend43ChannelList,currentSerialport);
-        retransmissionTimer0x43->start(200);
+        serialPortTool.takeFirst43ListWrite(dmrWrite,readySend43ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = dmrWrite.buildWriteData();
+        serialCommandManager->sendCommand(data, 0x43, [](){});
     } else {
         // 所有命令发送完成
         debug("0x43 写操作命令全部发送完成");
@@ -361,19 +356,21 @@ void termial::serialHandleCommand0x43(DMR& /*newDmr*/){
  *  DMR读
  */
 void termial::serialHandleCommand0x44(DMR& newDmr){
-    retryCount0x44 = 0;
+    serialCommandManager->resetRetryCount(0x44);
     int newRow = newDmr.getChannelID();
     viewUpdateDmr(newRow,newDmr);
 
-    stopTimerSafe(retransmissionTimer0x44);
+    serialCommandManager->stopAllTimers();
 
     // 更新进度条
     ui->load_progressBar->setValue(ui->load_progressBar->value()+1);
 
     if(!readySend44ChannelList->isEmpty()){
         // 获取下一个命令
-        serialPortTool.takeFirst44ListWrite(dmrRead,readySend44ChannelList,currentSerialport);
-        retransmissionTimer0x44->start(200);
+        serialPortTool.takeFirst44ListWrite(dmrRead,readySend44ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = dmrRead.buildReadData();
+        serialCommandManager->sendCommand(data, 0x44, [](){});
     } else {
         // 所有命令发送完成
         debug("0x44 读操作命令全部发送完成");
@@ -387,98 +384,7 @@ void termial::serialHandleCommand0x44(DMR& newDmr){
     }
 }
 
-/**
- *  0x40 定时器
- *  重发串口写命令
- */
- void termial::onTimeout0x40() {
-    if(retryCount0x40 >= 3) {
-        debug("0x40 命令已达到最大重试次数(3次)，跳过此命令");
-        retryCount0x40 = 0;  // 重置计数器
-        stopTimerSafe(retransmissionTimer0x40);
 
-        // 处理下一条命令
-        if(!readySend40ChannelList->isEmpty()) {
-            serialPortTool.takeFirst40ListWrite(channelWrite, readySend40ChannelList, currentSerialport);
-            retransmissionTimer0x40->start(200);
-        }
-        return;
-    }
-
-    QByteArray data = channelWrite.prepareWritePacketWithCRC();
-    debug("0x40 超时重发(尝试次数:" << retryCount0x40+1 << "):\n") << data.toHex(' ');
-    currentSerialport.write(data);
-    retryCount0x40++;
-}
-
-/**
- *  0x41 定时器
- *  重发串口读请求
-*/
-void termial::onTimeout0x41() {
-    if(retryCount0x41 >= 3) {
-        debug("0x41 命令已达到最大重试次数(3次)，跳过此命令");
-        retryCount0x41 = 0;
-        stopTimerSafe(retransmissionTimer0x41);
-
-        if(!readySend41ChannelList->isEmpty()) {
-            serialPortTool.takeFirst41ListWrite(channelRead, readySend41ChannelList, currentSerialport);
-            retransmissionTimer0x41->start(200);
-        }
-        return;
-    }
-
-    QByteArray data = channelRead.preparePacketWithCRC();
-    debug("0x41 超时重发(尝试次数:" << retryCount0x41+1 << "):\n") << data.toHex(' ');
-    currentSerialport.write(data);
-    retryCount0x41++;
-}
-
-/**
- *  0x43 写命令
- *  重发串口写请求
- */
-void termial::onTimeout0x43() {
-    if(retryCount0x43 >= 3) {
-        debug("0x43 命令已达到最大重试次数(3次)，跳过此命令");
-        retryCount0x43 = 0;
-        stopTimerSafe(retransmissionTimer0x43);
-
-        if(!readySend43ChannelList->isEmpty()) {
-            serialPortTool.takeFirst43ListWrite(dmrWrite, readySend43ChannelList, currentSerialport);
-            retransmissionTimer0x43->start(200);
-        }
-        return;
-    }
-
-    QByteArray data = dmrWrite.buildWriteData();
-    debug("0x43 超时重发(尝试次数:" << retryCount0x43+1 << "):\n") << data.toHex(' ');
-    currentSerialport.write(data);
-    retryCount0x43++;
-}
-
-/**
- *  0x44 读命令
- *  重发串口写请求
- */
-void termial::onTimeout0x44() {
-    if(retryCount0x44 >= 3) {
-        debug("0x44 命令已达到最大重试次数(3次)，跳过此命令");
-        retryCount0x44 = 0;
-        stopTimerSafe(retransmissionTimer0x44);
-
-        if(!readySend44ChannelList->isEmpty()) {
-            serialPortTool.takeFirst44ListWrite(dmrRead, readySend44ChannelList, currentSerialport);
-            retransmissionTimer0x44->start(200);
-        }
-        return;
-    }
-
-    QByteArray data = dmrRead.buildReadData();
-    debug("0x44 超时重发(尝试次数:" << retryCount0x44+1 << "):\n") << data.toHex(' ');
-    currentSerialport.write(data);
-    retryCount0x44++;
-}
 
 /*  UI操作  */
 
@@ -840,18 +746,13 @@ void termial::initConnect(){
     connect(ui->send_btn, &QPushButton::clicked, this, &termial::send_clicked);
     connect(ui->read_btn, &QPushButton::clicked, this, &termial::read_clicked);
 
-    // 串口有数据可读时触发
-    connect(&currentSerialport, &QSerialPort::readyRead, this, &termial::currentSerialport_readyRead);
+
     // 串口下拉框发生变化时
     connect(ui->serialport_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),this, &termial::serialportComboBox_currentIndexChanged);
     /* 串口按钮 */
     connect(ui->serialportLink_pushButton, &QPushButton::clicked, this, &termial::serialportLinkBtn_clicked); // 串口连接按钮点击时
 
-    /* 串口 定时器超时信号 */
-    connect(retransmissionTimer0x40, &QTimer::timeout, this, &termial::onTimeout0x40);
-    connect(retransmissionTimer0x41, &QTimer::timeout, this, &termial::onTimeout0x41);
-    connect(retransmissionTimer0x43, &QTimer::timeout, this, &termial::onTimeout0x43);
-    connect(retransmissionTimer0x44, &QTimer::timeout, this, &termial::onTimeout0x44);
+
 
     // 监听单行文本框的回车按下事件
     connect(ui->channelNum_lineEdit, &QLineEdit::returnPressed, this, &termial::channelNumLineEdit_returnPressed);
@@ -1330,8 +1231,7 @@ void termial::readBtn_clicked(){
         return;
     }
 
-    retryCount0x41 = 0;  // 开始新命令序列时重置计数器
-    retryCount0x44 = 0;
+
 
     // 计算进度条
     ui->load_progressBar->setMaximum(readySend41ChannelList->size() + readySend44ChannelList->size());
@@ -1340,9 +1240,10 @@ void termial::readBtn_clicked(){
 
     // 获取41列表中第一个命令,发送后删除对应命令
     if(!readySend41ChannelList->isEmpty()){
-        serialPortTool.takeFirst41ListWrite(channelRead,readySend41ChannelList,currentSerialport);
-        // 启动定时器，等待50毫秒，超时重发
-        retransmissionTimer0x41->start(200);
+        serialPortTool.takeFirst41ListWrite(channelRead,readySend41ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = channelRead.preparePacketWithCRC();
+        serialCommandManager->sendCommand(data, 0x41, [](){});
     }
 }
 
@@ -1352,7 +1253,7 @@ void termial::readBtn_clicked(){
  */
 void termial::send_clicked(){
      // 若没连接就点击
-    if(!currentSerialport.isOpen()){
+    if(!serialPortManager->isOpen()){
         QMessageBox::warning(this, tr("警告") , tr("未连接串口!"));
         return;
     }
@@ -1364,12 +1265,7 @@ void termial::send_clicked(){
         sendBtn_clicked();
     }else{
         ui->send_btn->setText(tr("发送"));
-        if(retransmissionTimer0x40->isActive()){
-            retransmissionTimer0x40->stop();
-        }
-        if(retransmissionTimer0x43->isActive()){
-            retransmissionTimer0x43->stop();
-        }
+        serialCommandManager->stopAllTimers();
 
         readySend40ChannelList->clear();
         readySend41ChannelList->clear();
@@ -1395,7 +1291,7 @@ void termial::read_clicked(){
     getAllCheckedRowsToListDmr(readySend44ChannelList);
 
     // 若没连接就点击
-    if(!currentSerialport.isOpen()){
+    if(!serialPortManager->isOpen()){
         QMessageBox::warning(this, tr("警告") , tr("未连接串口!"));
         return;
     }
@@ -1407,12 +1303,7 @@ void termial::read_clicked(){
         readBtn_clicked();
     }else{  // 再次点击终止发送
         ui->read_btn->setText(tr("读取"));
-        if(retransmissionTimer0x41->isActive()){
-            retransmissionTimer0x41->stop();
-        }
-        if(retransmissionTimer0x44->isActive()){
-            retransmissionTimer0x44->stop();
-        }
+        serialCommandManager->stopAllTimers();
 
         readySend40ChannelList->clear();
         readySend41ChannelList->clear();
@@ -1559,8 +1450,7 @@ void termial::sendBtn_clicked(){
         return;
     }
 
-    retryCount0x40 = 0;  // 开始新命令序列时重置计数器
-    retryCount0x43 = 0;
+
 
     // 计算进度条
     ui->load_progressBar->setMaximum(readySend40ChannelList->size() + readySend43ChannelList->size());
@@ -1573,8 +1463,10 @@ void termial::sendBtn_clicked(){
 
     // 只发送第一个命令，后续命令由响应处理
     if(!readySend40ChannelList->isEmpty()){
-        serialPortTool.takeFirst40ListWrite(channelWrite,readySend40ChannelList,currentSerialport);
-        retransmissionTimer0x40->start(200);
+        serialPortTool.takeFirst40ListWrite(channelWrite,readySend40ChannelList,*serialPortManager->getSerialPort());
+        // 使用SerialCommandManager发送命令
+        QByteArray data = channelWrite.prepareWritePacketWithCRC();
+        serialCommandManager->sendCommand(data, 0x40, [](){});
     }
 }
 
@@ -1625,34 +1517,17 @@ termial::~termial(){
     readySend43ChannelList->clear();
     readySend44ChannelList->clear();
 
-    // 确保所有定时器停止
-    QList<QTimer*> timers = findChildren<QTimer*>();
-    for (auto timer : timers) {
-        timer->stop();
-        timer->deleteLater();
+    // 清理命令管理器
+    if(serialCommandManager) {
+        serialCommandManager->stopAllTimers();
+        serialCommandManager = nullptr;
     }
 
     // 清理串口资源
-    if (currentSerialport.isOpen()) {
-        currentSerialport.close();
+    if(serialPortManager) {
+        serialPortManager->closePort();
+        serialPortManager = nullptr;
     }
 
-    /* 串口 */
-    stopTimerSafe(retransmissionTimer0x40);
-    stopTimerSafe(retransmissionTimer0x41);
-    stopTimerSafe(retransmissionTimer0x43);
-    stopTimerSafe(retransmissionTimer0x44);
-
-    currentSerialport.setDataTerminalReady(false);
-    currentSerialport.setRequestToSend(false);
-
-    disconnect(&currentSerialport, &QSerialPort::readyRead, this, &termial::currentSerialport_readyRead);
-
-    // 等待一段时间，确保信号生效
-    // QThread::msleep(100);
-
-    if(currentSerialport.isOpen()){
-        currentSerialport.close();  // 关闭串口
-    }
     delete ui;
 }
