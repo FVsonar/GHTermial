@@ -6,583 +6,728 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>804</width>
+    <width>1194</width>
     <height>781</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>国赫T7</string>
+   <string>控制终端</string>
   </property>
   <property name="toolTip">
    <string notr="true"/>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">/* 终端背景 - 深灰黑色 */
+#termial {
+    background-color: #1E1F22;
+}
+
+/* ========== QPushButton 按钮 ========== */
+QPushButton {
+    border: 1px solid #3E4044;
+    border-radius: 4px;
+    padding: 8px 15px;
+    min-height: 18px;
+    background-color: #2D2F33;
+    color: #D3D6DB;
+    font: 14px &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, sans-serif;
+    transition: all 0.2s;
+}
+
+QPushButton:hover {
+    background-color: #3A3D42;
+    border-color: #4E5258;
+    color: #EFF1F5;
+}
+
+QPushButton:pressed {
+    background-color: #25272B;
+    border-color: #5D6066;
+}
+
+QPushButton:disabled {
+    color: #5A5D61;
+    background-color: #2A2C30;
+    border-color: #35373B;
+}
+
+/* ========== QSpinBox 数字输入框 ========== */
+QSpinBox {
+    border: 1px solid #3E4044;
+    border-radius: 4px;
+    padding: 0 25px 0 8px; /* 右侧为箭头留出空间 */
+	height: 32px;
+	/*min-width:90px;*/
+    background-color: #2D2F33;
+    color: #D3D6DB;
+    selection-background-color: #3A8EE6;
+    selection-color: white;
+    font: 14px &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+/* 箭头按钮通用样式 */
+QSpinBox::up-button, QSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 20px;
+    height: 15px; /* 精确控制高度 */
+    border-left: 1px solid #3E4044;
+    background-color: #35373B;
+}
+
+/* 上按钮定位 */
+QSpinBox::up-button {
+    subcontrol-position: top right;
+    top: 1px; /* 对齐边框 */
+    right: 1px;
+    border-bottom: 1px solid #3E4044;
+    border-top-right-radius: 3px;
+}
+
+/* 下按钮定位 */
+QSpinBox::down-button {
+    subcontrol-position: bottom right;
+    bottom: 1px; /* 对齐边框 */
+    right: 1px;
+    border-bottom-right-radius: 3px;
+}
+
+/* 箭头图标 - 使用SVG或PNG */
+QSpinBox::up-arrow {
+    image: url(://img/up.png);
+    width: 10px;
+    height: 10px;
+}
+
+QSpinBox::down-arrow {
+    image: url(://img/down.png);
+    width: 10px;
+    height: 10px;
+}
+
+/* 悬停状态 */
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    background-color: #3E4044;
+}
+
+QSpinBox::up-arrow:hover {
+    image: url(://img/up.png);
+}
+
+QSpinBox::down-arrow:hover {
+    image: url(://img/down.png);
+}
+
+/* 按下状态 */
+QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
+    background-color: #2A2C30;
+}
+
+/* 禁用状态 */
+QSpinBox:disabled, 
+QSpinBox::up-button:disabled, 
+QSpinBox::down-button:disabled {
+    background-color: #25272A;
+    color: #5C5F66;
+}
+
+QSpinBox::up-arrow:disabled, 
+QSpinBox::down-arrow:disabled {
+    opacity: 0.5;
+}
+/* ========== QLineEdit 输入框 ========== */
+QLineEdit {
+    border: 1px solid #3E4044;
+    border-radius: 4px;
+    padding: 0 15px;
+    height: 33px;
+    background-color: #2D2F33;
+    color: #D3D6DB;
+    selection-background-color: #3A8EE6;
+}
+
+QLineEdit:hover {
+    border-color: #4E5258;
+}
+
+QLineEdit:focus {
+    border-color: #3A8EE6;
+}
+
+QLineEdit::placeholder {
+    color: #6A6D72;
+    font-style: italic;
+}
+
+/* ========== QComboBox 下拉框 ========== */
+/* ========== QComboBox 基础样式 ========== */
+QComboBox {
+    border: 1px solid #45474C;
+    border-radius: 4px;
+    padding: 0 30px 0 12px;  /* 右侧留出下拉按钮空间 */
+    min-height: 32px;
+    background-color: #2B2D30;
+    color: #E0E3E9;
+    font: 14px &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, sans-serif;
+    selection-background-color: #3A8EE6;
+    selection-color: white;
+}
+
+/* 可编辑状态特殊处理 */
+QComboBox:editable {
+    padding-right: 30px;  /* 确保编辑框不会覆盖下拉按钮 */
+}
+
+/* 下拉按钮定位修正 */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 30px;
+    border-left: 1px solid #45474C;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    background-color: #35373B;
+    right: 1px;  /* 对齐边框 */
+}
+
+/* 下拉箭头图标 */
+QComboBox::down-arrow {
+    image: url(://img/down.png);
+    width: 12px;
+    height: 12px;
+}
+
+/* 移除可编辑框的内置下拉指示器 */
+QComboBox::drop-down:editable {
+    width: 0;
+    border: none;
+}
+/* 下拉菜单面板 */
+QComboBox QAbstractItemView {
+    border: 1px solid #45474C;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    background-color: #2B2D30;
+    padding: 4px 0;
+    outline: none;
+    margin-top: 2px; /* 消除与主控件的间隙 */
+}
+
+/* 下拉菜单中的项 */
+QComboBox QAbstractItemView::item {
+    min-height: 32px;
+    padding: 0 12px;
+    color: #D8DBE2;
+    background-color: transparent;
+}
+
+/* 项悬停状态 */
+QComboBox QAbstractItemView::item:hover {
+    background-color: #35373B;
+}
+
+/* 项选中状态 */
+QComboBox QAbstractItemView::item:selected {
+    background-color: #3A8EE6;
+    color: white;
+}
+
+/* 可编辑组合框的编辑区域 */
+QComboBox QLineEdit {
+    padding: 0 8px;
+    background: transparent;
+    color: #E0E3E9;
+    border: none;
+    selection-background-color: #3A8EE6;
+}
+
+/* 可编辑组合框的编辑区域禁用状态 */
+QComboBox:disabled QLineEdit {
+    color: #5C5F66;
+}
+/* ========== 全局增强 ========== */
+/* 统一禁用状态样式 */
+QSpinBox:disabled, QLineEdit:disabled, QComboBox:disabled {
+    color: #5A5D61;
+    background-color: #25272A;
+    border-color: #303235;
+}
+
+/* 统一焦点效果 */
+*:focus {
+    outline: none;
+}
+
+/* 滚动条样式 */
+QScrollBar:vertical {
+    background: #25272A;
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3E4044;
+    min-height: 20px;
+    border-radius: 5px;
+}</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="currentIndex">
-        <number>4</number>
-       </property>
-       <widget class="QWidget" name="tab_5">
-        <attribute name="title">
-         <string>首页</string>
-        </attribute>
+    <widget class="QWidget" name="widget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QComboBox" name="serialport_comboBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>34</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>210</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>请选择对应串口</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
        </widget>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>编程</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QWidget" name="data" native="true">
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QWidget" name="tools" native="true">
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <property name="sizeConstraint">
-                <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
-               </property>
-               <item>
-                <widget class="QPushButton" name="checkAll_pushButton">
-                 <property name="text">
-                  <string>全选</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="checkNotAll_pushButton">
-                 <property name="text">
-                  <string>全不选</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="channelNum_lineEdit">
-                 <property name="placeholderText">
-                  <string>跳转Channel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="load_progressBar">
-                 <property name="value">
-                  <number>24</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTableWidget" name="viewTable_tableWidget">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="serialportFlash_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>36</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>刷新串口列表</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+    border-radius: 17px;  /* 让按钮变成圆形 */
+    border: none;
+    font-weight: bold;
+	width: 8px;
+    height: 20px;
+	background-image: url(&quot;://img/flash.png&quot;);
+    background-repeat: no-repeat;  /* 禁止图片重复 */
+    background-position: center;  /* 图片居中 */
+    background-clip: padding-box;  /* 确保背景只在padding区域内 */
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
        </widget>
-       <widget class="QWidget" name="tab_2">
-        <attribute name="title">
-         <string>设置</string>
-        </attribute>
+      </item>
+      <item>
+       <widget class="QPushButton" name="serialportLink_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>连接串口</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton.success {
+    background-color: #67C23A;
+    border-color: #67C23A;
+    color: white;
+}
+
+QPushButton.success:hover {
+    background-color: #85ce61;
+    border-color: #85ce61;
+}
+
+QPushButton.success:pressed {
+    background-color: #5daf34;
+    border-color: #5daf34;
+}
+
+QPushButton.success:disabled {
+    background-color: #C8E6C9;
+    border-color: #C8E6C9;
+    color: white;
+}</string>
+        </property>
+        <property name="text">
+         <string>连接</string>
+        </property>
        </widget>
-       <widget class="QWidget" name="tab_3">
-        <attribute name="title">
-         <string>工程模式</string>
-        </attribute>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="language_comboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>34</height>
+         </size>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>选择语言</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
        </widget>
-       <widget class="QWidget" name="tab_4">
-        <attribute name="title">
-         <string>天调</string>
-        </attribute>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">/* ========== QTabWidget 主容器 ========== */
+QTabWidget {
+    background: transparent;
+    border: none;
+}
+
+/* ========== 标签栏样式 ========== */
+QTabWidget::pane {
+    border: 1px solid #3A3C40;
+    border-radius: 4px;
+    background: #25272B;
+    margin: 0;
+    padding: 0;
+    top: -1px; /* 消除与标签的间隙 */
+}
+
+QTabWidget::tab-bar {
+    alignment: left;
+    left: 8px; /* 标签栏左侧偏移 */
+}
+
+/* ========== 单个标签样式 ========== */
+QTabBar::tab {
+    background: #2D2F33;
+    color: #B0B3B8;
+    border: 1px solid #3A3C40;
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 8px 16px;
+    margin-right: 4px;
+    min-width: 80px;
+    font: 14px &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+/* 悬停状态 */
+QTabBar::tab:hover {
+    background: #35373B;
+    color: #D3D6DB;
+}
+
+/* 选中状态 */
+QTabBar::tab:selected {
+    background: #25272B;
+    color: #E0E3E9;
+    border-color: #3A3C40;
+    border-bottom: 1px solid #25272B; /* 与内容区域融合 */
+    margin-bottom: -1px; /* 下移1px覆盖内容区边框 */
+}
+
+/* 非选中状态 */
+QTabBar::tab:!selected {
+    margin-top: 2px; /* 视觉上降低未选标签 */
+}
+
+/* 禁用状态 */
+QTabBar::tab:disabled {
+    color: #5C5F66;
+    background: #2A2C30;
+}
+
+/* ========== 标签栏角落控件 ========== */
+QTabBar::scroller {
+    width: 20px;
+    background: #2D2F33;
+}
+
+QTabBar QToolButton {
+    background: #2D2F33;
+    border: 1px solid #3A3C40;
+}
+
+/* ========== 内容区域样式 ========== */
+QTabWidget::tab-contents {
+    background: #25272B;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+}</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <attribute name="title">
+       <string>编程</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QWidget" name="data" native="true">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QWidget" name="tools" native="true">
+            <property name="styleSheet">
+             <string notr="true">#tools{
+	background-color: #3C3D3F;
+	border-radius: 15px
+}</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="sizeConstraint">
+              <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+             </property>
              <item>
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>当前模式:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="tunerCurrentModel_label">
-               <property name="text">
-                <string>自动调谐</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="Line" name="line_7">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="auto_radioButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>自动调谐</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="start_radioButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>手动调谐</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="close_radioButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>关闭调谐</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="0" column="1">
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <widget class="QLabel" name="label_5">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>电压(单位:v)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLCDNumber" name="voltage_lcdNumber">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>200</width>
-               <height>0</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLabel" name="label_3">
+              <widget class="QPushButton" name="checkAll_pushButton">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>驻波调谐值</string>
+               <property name="toolTip">
+                <string>全选</string>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <property name="text">
+                <string>全选</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="swtValue_label">
+              <widget class="QPushButton" name="checkNotAll_pushButton">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="10">
-              <widget class="QLabel" name="label_24">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_24{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>  11</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_14">
-               <property name="text">
-                <string>1.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="9">
-              <widget class="QLabel" name="label_23">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_23{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string> 10</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="7">
-              <widget class="QLabel" name="label_21">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_21{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>8</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="label_16">
-               <property name="text">
-                <string> 3.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="label_15">
-               <property name="text">
-                <string>2.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QLabel" name="label_17">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_17{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>4</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="4">
-              <widget class="QLabel" name="label_18">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_18{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>5</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="11">
-              <widget class="QLabel" name="label_25">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_25{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>  12</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="12">
-              <widget class="QLabel" name="label_26">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_26{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>  13</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="5">
-              <widget class="QLabel" name="label_19">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_19{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>6</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="8">
-              <widget class="QLabel" name="label_22">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_22{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>9</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="6">
-              <widget class="QLabel" name="label_20">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_20{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>7</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="13">
-              <widget class="QLabel" name="label_27">
-               <property name="styleSheet">
-                <string notr="true">QLabel#label_27{
-	color:#ff1418
-}</string>
-               </property>
-               <property name="text">
-                <string>14</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QSlider" name="swr_horizontalSlider">
-             <property name="minimum">
-              <number>10</number>
-             </property>
-             <property name="maximum">
-              <number>140</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TickPosition::TicksAbove</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_16">
-             <item>
-              <widget class="QDial" name="swtValue_dial">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <number>10</number>
-               </property>
-               <property name="maximum">
-                <number>140</number>
-               </property>
-               <property name="sliderPosition">
-                <number>10</number>
-               </property>
-               <property name="wrapping">
-                <bool>false</bool>
-               </property>
-               <property name="notchTarget">
-                <double>10.000000000000000</double>
-               </property>
-               <property name="notchesVisible">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
-             <item>
-              <widget class="QDoubleSpinBox" name="swtValue_doubleSpinBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
+               <property name="minimumSize">
                 <size>
-                 <width>100</width>
-                 <height>16777215</height>
+                 <width>0</width>
+                 <height>36</height>
                 </size>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
+               <property name="toolTip">
+                <string>取消全选</string>
                </property>
-               <property name="readOnly">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="text">
+                <string>全不选</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="read_btn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>读取串口数据</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="text">
+                <string>读取</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="send_btn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>发送串口数据</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="text">
+                <string>发送</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="save_pushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>保存信道文件</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">/*QPushButton{
+	background-image: url(&quot;://img/saveJson.png&quot;);
+    background-repeat: no-repeat;  
+    background-position: center;  
+    background-clip: padding-box;
+}
+*/</string>
+               </property>
+               <property name="text">
+                <string>保存</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="open_pushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>写入信道文件</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"> /*QPushButton{
+	background-image: url(&quot;://img/openJson.png&quot;);
+    background-repeat: no-repeat;  
+    background-position: center;  
+    background-clip: padding-box;
+}*/</string>
+               </property>
+               <property name="text">
+                <string>打开</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_31">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="acceptDrops">
                 <bool>false</bool>
                </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
-               </property>
-               <property name="decimals">
-                <number>1</number>
-               </property>
-               <property name="minimum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>14.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="0" colspan="2">
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <item>
-            <widget class="QPushButton" name="SWT_pushButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>50</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>驻波调谐</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="Line" name="line_6">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0" colspan="2">
-          <layout class="QVBoxLayout" name="verticalLayout_7">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+               <property name="styleSheet">
+                <string notr="true">#label_31{
+color:rgb(255, 255, 255)
+}</string>
                </property>
                <property name="text">
-                <string>正向功率校准值</string>
+                <string>0~</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -590,667 +735,236 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="PPc_label">
+              <widget class="QSpinBox" name="channelMaxNum_spinBox">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>0</string>
+               <property name="toolTip">
+                <string>快速勾选信道</string>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               <property name="styleSheet">
+                <string notr="true">#channelMaxNum_spinBox{
+	min-width:90px;
+}</string>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>10</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="channelNum_lineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>跳转至对应信道号</string>
+               </property>
+               <property name="placeholderText">
+                <string>跳转Channel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QProgressBar" name="load_progressBar">
+               <property name="value">
+                <number>24</number>
                </property>
               </widget>
              </item>
             </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QLabel" name="label_28">
-               <property name="text">
-                <string>更改:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="PPc_horizontalSlider">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::TickPosition::TicksAbove</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="PPcv_spinBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item row="5" column="0" colspan="2">
-          <layout class="QVBoxLayout" name="verticalLayout_8">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QLabel" name="label_11">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>驻波校准值</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="Swc_label">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>0</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <item>
-              <widget class="QLabel" name="label_29">
-               <property name="text">
-                <string>更改:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="Swc_horizontalSlider">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::TickPosition::TicksAbove</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="Swcv_spinBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item row="6" column="0" colspan="2">
-          <layout class="QVBoxLayout" name="verticalLayout_9">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QLabel" name="label_12">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>电压校准值</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="Vc_label">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>0</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <widget class="QLabel" name="label_30">
-               <property name="text">
-                <string>更改:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="Vc_horizontalSlider">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::TickPosition::TicksAbove</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="Vcv_spinBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
-               </property>
-               <property name="minimum">
-                <number>-100</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item row="7" column="0" colspan="2">
-          <layout class="QHBoxLayout" name="horizontalLayout_17">
-           <item>
-            <widget class="QPushButton" name="ATC_pushButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>50</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>天调校准</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_4">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QWidget" name="control" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>语言</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="language_comboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>文件</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QPushButton" name="save_pushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>保存</string>
-            </property>
-            <property name="icon">
-             <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="open_pushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>打开</string>
-            </property>
-            <property name="icon">
-             <iconset theme="QIcon::ThemeIcon::DocumentSaveAs"/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>网络连接</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_7">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>本机地址</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="IPLocal_lineEdit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>192.168.1.68</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_8">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>TCP端口</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="tcpPort_lineEdit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>20108</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="tcpOpen_pushButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>开启服务器</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_9">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>已连接设备</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="connectedDevices_comboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string notr="true"/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_3">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>串口连接</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QComboBox" name="serialport_comboBox">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>210</width>
-              <height>0</height>
-             </size>
-            </property>
+           <widget class="QTableView" name="tableView">
             <property name="toolTip">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="serialportFlash_pushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
              <string/>
             </property>
-            <property name="icon">
-             <iconset theme="QIcon::ThemeIcon::SyncSynchronizing"/>
+            <property name="styleSheet">
+             <string notr="true">/* ========== 基础表格样式 ========== */
+QTableView {
+    border: 1px solid #3A3C40;
+    background-color: #25272B;  /* 比主背景稍浅的深色 */
+    gridline-color: #3A3C40;
+    border-radius: 4px;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, sans-serif;
+    font-size: 14px;  /* 稍小的字号提高可读性 */
+    selection-background-color: #3A5F8A;
+    selection-color: #E0E2E5;
+    outline: 0;
+    alternate-background-color: #2D2F33;  /* 交替行颜色 */
+}
+
+/* ========== 表头样式 ========== */
+QHeaderView {
+    background-color: #2D2F33;  /* 比表格背景略亮 */
+    border: none;
+    border-bottom: 1px solid #3A3C40;
+}
+
+QHeaderView::section {
+    background-color: transparent;
+    color: #C5C8CF;
+    padding: 8px 0;  /* 减少内边距 */
+    border: none;
+    border-right: 1px solid #3A3C40;
+    font-weight: 600;  /* 加粗表头文字 */
+}
+
+QHeaderView::section:hover {
+    background-color: #35373B;  /* 悬停效果 */
+}
+
+QHeaderView::section:checked {
+    background-color: #3A5F8A;  /* 选中状态使用主题蓝色 */
+    color: white;
+}
+
+/* ========== 单元格样式 ========== */
+QTableView::item {
+    color: #D3D6DB;
+    border-bottom: 1px solid #3A3C40;
+    /*padding: 6px 8px;   适中的内边距 */
+}
+
+/* 交替行颜色 - 比基础背景稍亮 */
+QTableView::item:alternate {
+    background-color: #2A2C30;
+}
+
+/* 悬停效果 - 使用半透明蓝色 */
+QTableView::item:hover {
+    background-color: rgba(58, 143, 230, 0.15);
+}
+
+/* 选中行样式 - 深蓝色 */
+QTableView::item:selected {
+    background-color: #3A5F8A;
+    color: white;
+}
+
+/* 选中行但无焦点时的样式 */
+QTableView::item:selected:!active {
+    background-color: #2D4A6B;
+}
+
+/* ========== 表格角部样式 ========== */
+QTableCornerButton::section {
+    background-color: #2D2F33;
+    border: none;
+    border-bottom: 1px solid #3A3C40;
+    border-right: 1px solid #3A3C40;
+}
+
+/* ========== 滚动条样式 ========== */
+QScrollBar:vertical {
+    border: none;
+    background: #25272B;
+    width: 10px;  /* 稍宽的滚动条 */
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #3E4044;
+    border-radius: 5px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4A4D51;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background: #25272B;
+    height: 10px;
+    margin: 0;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3E4044;
+    border-radius: 5px;
+    min-width: 30px;
+}
+
+/* 移除滚动条箭头 */
+QScrollBar::add-line, QScrollBar::sub-line,
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+    border: none;
+}
+
+/* ========== 特殊状态 ========== */
+/* 禁用状态 */
+QTableView:disabled {
+    color: #6A6D72;
+    background-color: #25272B;
+}
+
+/* 只读状态 */
+QTableView:read-only {
+    background-color: #25272B;
+}
+QCheckBox {
+    color: #D3D6DB;
+    spacing: 8px;
+    padding: 2px;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #3A3C40;
+    border-radius: 3px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #2D2F33, stop:1 #25272B);
+    transition: all 0.3s ease;  /* 平滑过渡效果 */
+}
+
+QCheckBox::indicator:checked {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #3A5F8A, stop:1 #2D4A6B);
+    image: url(:/icons/checkmark_white.svg);
+    transform: scale(1.05);  /* 轻微放大效果 */
+}
+
+/* ========== 不可编辑单元格样式 ========== */
+/* 使用属性选择器来精确匹配不可编辑单元格 */
+QTableView::item[readOnly=&quot;true&quot;] {
+    background-color: #2A2C30;
+    color: #8A8D93;
+    border-right: 1px dashed #3A3C40;
+}
+
+/* 交替行中的不可编辑单元格 */
+QTableView::item[readOnly=&quot;true&quot;]:alternate {
+    background-color: #25272B;
+}
+
+/* 选中状态下的不可编辑单元格 */
+QTableView::item[readOnly=&quot;true&quot;]:selected {
+    background-color: #2D4A6B;
+    color: #B0B3B8;
+}
+</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="serialportLink_pushButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>连接</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_5">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QPushButton" name="send_btn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>发送</string>
-            </property>
-            <property name="icon">
-             <iconset theme="QIcon::ThemeIcon::DocumentSend"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="read_btn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>读取</string>
-            </property>
-            <property name="icon">
-             <iconset theme="QIcon::ThemeIcon::EditFind"/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

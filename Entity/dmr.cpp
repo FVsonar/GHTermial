@@ -532,6 +532,38 @@ void DMR::setCallID(unsigned int newCallID)
     callID = newCallID;
 }
 
+/**
+ * 弃用，似乎不需要考虑字母+数字的情况
+ */
+void DMR::setCallID(const QString &input)
+{
+    unsigned int numericId = 0;
+
+    //  检查输入是否为纯数字
+    bool isNumeric = false;
+    unsigned int pureNumber = input.toUInt(&isNumeric);
+
+    if (isNumeric) {
+        // 纯数字模式：直接使用，但限制范围
+        numericId = qBound(1u, pureNumber, 16777215u); // 限制在 1~16777215
+    } else {
+        // 字母+数字模式：通过哈希转换为数字
+        QByteArray bytes = input.toUtf8();
+        unsigned int hash = 0;
+        for (char c : bytes) {
+            hash = (hash * 31) + c; // 简单哈希算法
+        }
+        numericId = (hash % 16777215) + 1; // 限制范围
+    }
+
+    // 存储数字和字节拆分
+    this->callID = numericId;
+    this->callId1 = static_cast<char>((numericId >> 24) & 0xFF);
+    this->callId2 = static_cast<char>((numericId >> 16) & 0xFF);
+    this->callId3 = static_cast<char>((numericId >> 8) & 0xFF);
+    this->callId4 = static_cast<char>(numericId & 0xFF);
+}
+
 unsigned int DMR::getOwnID()
 {
     ownID = (this->getOwnId1() << 24)

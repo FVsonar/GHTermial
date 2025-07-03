@@ -16,8 +16,6 @@
 #include <QJsonObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
-#include <QTcpServer>
-#include <QTcpSocket>
 #include <QUdpSocket>
 #include <QSpinBox>
 #include <QTranslator>
@@ -25,28 +23,29 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QButtonGroup>
 #include <QMessageBox>
+#include <QMouseEvent>
+#include <QStandardItemModel>
+#include <Delegates/checkboxdelegate.h>
+#include <Delegates/comboboxdelegate.h>
+#include <Delegates/spinboxdelegate.h>
+
 
 #include "Entity/channel.h"
 #include "Entity/dmr.h"
-#include "Entity/tuner.h"
 
 #include "Tools/serialporttools.h"
-#include "Tools/tcptools.h"
 
 #include "Service/channel_service.h"
 #include "Service/dmr_service.h"
-#include "Service/tuner_service.h"
 
-#include "DAO/tuner_dao.h"
 #include "DAO/channel_dao.h"
-#include "DAO/channeldmr_dao.h"
 #include "DAO/dmr_dao.h"
 
-#include "view/tuner_view.h"
-#include "clientinfo.h"
 
 
+#ifndef debug
 #define debug(x) qDebug().noquote()<<QTime::currentTime()<<"termial:["<<__LINE__<<"]"<<__FUNCTION__<<"()"<<x
+#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -67,10 +66,31 @@ public:
     const int MAX_TIMEOUT_MUN = 3;
     int currentErrorMun = 0;
     QString connectionName;  // 储存是TCP连接还是串口连接
+    const QStringList vfoModes = {"USB" , "LSB" , "CWR" , "CWL" , "AM" , "WFM" , "NFM" , "DIGI" , "PKT" , "DMR" };//DFM模式在ch_type中
+    const QStringList yayinModes = {"0","67.0","69.3","71.9","74.4","77.0","79.7","82.5","85.4","88.5","91.5","94.8","97.4","100.0",
+                                    "103.5","107.2","110.9","114.8","118.8","123.0","127.3","131.8","136.5","141.3","146.2","150.0",
+                                    "151.4","156.7","159.8","162.2","165.5","167.9","171.3","173.8","177.3","179.9","183.5","186.2",
+                                    "189.9","192.8","196.6","199.5","203.5","206.5","210.7","213.8","218.1","221.3","225.7","229.1",
+                                    "233.6","237.1","241.8","245.5","250.3","254.1"};
+    const QStringList dmrYayinModes = {"0","63.0","67.0","69.3","71.9","74.4","77.0","79.7","82.5","85.4","88.5","91.5","94.8","97.4","100.0",
+                                       "103.5","107.2","110.9","114.8","118.8","123.0","127.3","131.8","136.5","141.3","146.2","150.0",
+                                       "151.4","156.7","159.8","162.2","165.5","167.9","171.3","173.8","177.3","179.9","183.5","186.2",
+                                       "189.9","192.8","196.6","199.5","203.5","206.5","210.7","213.8","218.1","221.3","225.7","229.1",
+                                       "233.6"};
+    const QStringList callTypes = {"Single", "Group", "All"};
+    const QStringList chTypes = {"DFM", "DMR"};
 
     bool tunerSend(QByteArray data);
+    void setNumCheckedState(int value);
+    void channelMaxNumSpinBox_valueChanged(int value);
+    void handleAllCommandsCompleted_channel();
+    void initializeTableRows(int start, int count);
 signals:
 
+protected:
+    QPoint m_dragPosition;
+    // void mousePressEvent(QMouseEvent *event) override;
+    // void mouseMoveEvent(QMouseEvent *event) override;
 
 public slots:
     void serialportComboBox_currentIndexChanged(int index);    // 当串口选择下拉框发生变化时
@@ -78,8 +98,6 @@ public slots:
     void currentSerialport_readyRead();
     void readBtn_clicked();
     void sendBtn_clicked();
-
-    void tcpOpenBtn_clicked();
 
     void onTimeout0x40();
     void onTimeout0x41();
@@ -91,110 +109,67 @@ public slots:
     // void scanSerialPort_timeout();
     void checkAllNotBtn_clicked();
     // void scanNetworkInterfaces();
-    void tcpServerNewConnection();
-    void tcpSocket_readyRead();
-    void tcpReadBtn_clicked();
-    void tcpSendBtn_clicked();
-    void tcpOnTimeout0x40();
-    void tcpOnTimeout0x41();
 
-    void heartbeat_outtime();
     void onTimeout0x44();
     void onTimeout0x43();
-    void tcpOnTimeout0x43();
-    void tcpOnTimeout0x44();
+
     // void scanSerialPort_timeout();
     void serialportFlashBtn_clicked();
 
     void tabWidgetSwitch(int index);
+
 private slots:
-    void swtBtn_clicked();
-    void TUNER_synchronousBtn_clicked();
-    void ATCbtn_clicked();
-    void onTimerout0x47(QByteArray data);
+
     void send_clicked();
     void read_clicked();
-    void tunerOnTimer0x46();
-    void tunerOnTimer0x47();
-    void tunerOnTimer0x48();
-    void swcHorizontalSlier_valueChanged(int value);
-    void ppcHorizontalSlier_valueChanged(int value);
-    void vcHorizontalSlier_valueChanged(int value);
-    void vcvSpinBox_valueChanged(int value);
-    void swcvSpinBox_valueChanged(int value);
-    void ppcvSpinBox_valueChanged(int value);
-    // void swtDial_valueChanged(int value);
-    void swtDial_valueChanged(int value);
-    void swtDoubleSpinBox_valueChanged(double value);
-private:
+
+    void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+
+public:
     Ui::termial *ui;
+
+    QByteArray lastSentData;
+    int sendCount = 0;
+    int lx10 = 0;
 
     Tools tool;
     SerialPort serialPortTool;
-    TcpTools tcpTools;
 
     Channel_Service channel_service;
     Dmr_Service dmr_service;
-    TUNER_service tuner_service;
 
     Channel_DAO channel_dao;
     Dmr_DAO dmr_dao;
-    TUNER_DAO tuner_dao;
-
-    TUNER_view tuner_v;
 
     QTranslator translator; // 翻译
 
     QString currentPage;    // 当前所在页名称,可当pageIndex使用
 
-    /* 天调 */
-    QButtonGroup* swtBtnGroup; // 驻波协调单选组
+    bool readBtn_busy;  // 读取按钮的状态 是否正在读取 在：true 不在：false
+    bool sendBtn_busy;  // 发送按钮的状态 是否正在发送 在：true 不在：false
 
     /* 串口定时器 超时重发 */
     QTimer *retransmissionTimer0x40;   // 0x40
     QTimer *retransmissionTimer0x41;    // 0x41
     QTimer *retransmissionTimer0x43;    // 0x43
     QTimer *retransmissionTimer0x44;    // 0x44
-    /* tcp定时器 超时重发 */
-    QTimer *tcpRetransmissionTimer0x40;
-    QTimer *tcpRetransmissionTimer0x41;
-    QTimer *tcpRetransmissionTimer0x43;
-    QTimer *tcpRetransmissionTimer0x44;
-    /* 天调定时器 超时重发 */
-    QTimer * tunerRetransmissionTimer0x46;
-    QTimer * tunerRetransmissionTimer0x47;
-    QTimer * tunerRetransmissionTimer0x48;
 
-    QTimer *heartbeatTimer; // 心跳包定时器 超时发送心跳包
+    int retryCount0x40 = 0;  // 0x40命令重试计数器
+    int retryCount0x41 = 0;  // 0x41命令重试计数器
+    int retryCount0x43 = 0;  // 0x43命令重试计数器
+    int retryCount0x44 = 0;  // 0x44命令重试计数器
 
     channel channelWrite;   // 0x40 信道数据对象
     channel channelRead;    // 0x41 信道数据对象
     DMR dmrWrite;           // 0x43 DMR数据对象
     DMR dmrRead;            // 0x44 DMR数据对象
 
-    /* 表格列 列表 */
-    QVector<QCheckBox*> checkBoxPrtList;            // 储存下拉框list 用于全选/全不选 释放空间
-    QList<QComboBox*> vfoaComboBoxPtrList;          // vfoa模式下拉框list 用于释放空间
-    QList<QComboBox*> vfobComboBoxPtrList;          // vfoab模式下拉框list 用于释放空间
-    QList<QComboBox*> EmitYayinComboBoxPtrList;     // 发射亚音下拉框list 用于释放空间
-    QList<QComboBox*> ReceiveYayinComboBoxPtrList;  // 发射亚音下拉框list 用于释放空间
-    QList<QComboBox*> callTypeComboBoxPtrList;      // DMR的call_type下拉框list
-    QList<QSpinBox*> txCcSpinBoxPtrList;            // DMR的TX_CC数字选择框list
-    QList<QSpinBox*> rxCcSpinBoxPtrList;            // DMR的RX_CC数字选择框list
-    QList<QSpinBox*> slotSpinBoxPtrList;            // DMR的slot数字选择框list
-    QList<QComboBox*> chTypeComboBoxPtrList;        // DMR的CH_TYPE下拉框list
-    QList<QComboBox*> rxCtcssComboBoxPtrList;       // DMR的RX_CTCSS下拉框list
-    QList<QComboBox*> txCtcssComboBoxPtrList;       // DMR的RX_CTCSS下拉框list
-    QList<QSpinBox*> sqlevelSpinBoxPtrList;         // DMR的sqlevel数字选择框list
-    QList<QSpinBox*> spkgainSpinBoxPtrList;         // DMR的spkgain
-    QList<QSpinBox*> rxGainSpinBoxPtrList;          // DMR的dmod_gain
-    QList<QComboBox*> enScrComboBoxPtrList;         // DMR scr_en 0不加密 1加密
-    QList<QComboBox*> bsModeComboBoxPtrList;        // DMR ch_bs_mode 0~1
+
     /* 表格 勾选 */
-    QList<channel> readySend40ChannelList;  // 所有被勾选的Channel对象    0x40的newChannelList
-    QList<channel> readySend41ChannelList;  // 所有被勾选的Channel对象    0x41的newChannelList
-    QList<DMR> readySend43ChannelList;      // 储存表格中所有被勾选的DMR对象    0x43的newDMRList
-    QList<DMR> readySend44ChannelList;      // 储存表格中所有被勾选的DMR对象    0x44的newDMRList
+    QList<channel>* readySend40ChannelList;  // 所有被勾选的Channel对象    0x40的newChannelList
+    QList<channel>* readySend41ChannelList;  // 所有被勾选的Channel对象    0x41的newChannelList
+    QList<DMR>* readySend43ChannelList;      // 储存表格中所有被勾选的DMR对象    0x43的newDMRList
+    QList<DMR>* readySend44ChannelList;      // 储存表格中所有被勾选的DMR对象    0x44的newDMRList
 
     /* 串口 */
     QList<QSerialPortInfo> serialPortList;      // 所有串口QSerialPortInfo对象的列表
@@ -206,14 +181,24 @@ private:
     bool isAllSet=false;                    // 是否全选 -1全不选 0有选
     bool orAllSet=false;                    // 是否为 全选/全不选 状态
     bool serialportLinkBtn_state = false;   // 串口连接按钮 未连接-false 连接-true 默认false
-    bool tcpOpenBtn_state = false;          // TCP连接按钮 未连接-false 连接-true 默认false
+
     bool vfoaModeIsDmr = false; // vfoa模式是否为DMR 控制DMR是否可修改
     bool vfobModeIsDmr = false; // vfob模式是否为DMR 控制DMR是否可修改
 
-    /* TCP */
-    QTcpServer *tcpServer;
-    QList<ClientInfo> tcpSocketList;    // 所有已连接的客户端
-    ClientInfo currentClient;   // 下拉框当前选中的客户端  通过getCurrentClientInfo更新
+
+
+    QStandardItemModel *model; // 数据模型
+    // 委托指针
+    CheckBoxDelegate *checkBoxDelegate;
+    ComboBoxDelegate *vfoModeDelegate;
+    ComboBoxDelegate *yayinDelegate;
+    ComboBoxDelegate *dmrYayinDelegate;
+    ComboBoxDelegate *callTypeDelegate;
+    SpinBoxDelegate *ccDelegate;    // DMR的色码
+    SpinBoxDelegate *slotDelegate;  // 时隙的数字选择框
+    SpinBoxDelegate *idDelegate;    // call_id own_id的数字选择框
+    ComboBoxDelegate *chTypeDelegate;   // 信号类型下拉选择框
+
 
     /* 初始化函数 */
     void initSerialportComboBox();
@@ -224,17 +209,14 @@ private:
     void initConnect();
     void initLanguageComboBox();
     void initArt();
-    void initTunerSwtRadioBtn();    // 初始化天调驻波调谐 单选框
+
+    void initModelsAndViews(); // 初始化模型和视图
+    // 初始化表格视图
+    void initTableView();
 
     /* vfo 模式发生改变 */
-    void vfoaComboBoxIndexChanged(int row, int index);
-    void vfobComboBoxIndexChanged(int row, int index);
     void updateDmrWidgetsState(int row);
-    /* tcp 处理回复数据 */
-    void handleCommand0x40(channel &newChannel);
-    void handleCommand0x41(channel &newChannel);
-    void handleCommand0x43(DMR &newDmr);
-    void handleCommand0x44(DMR &newDmr);
+
     /* 串口 处理回复数据 */
     void serialHandleCommand0x40(channel &newChannel);
     void serialHandleCommand0x41(channel &newChannel);
@@ -276,19 +258,12 @@ private:
     *  @value const QString &filter    文件过滤器,用;;分隔
     *  @return QString filePath    返回选择的文件路径
     */
-    void getAllCheckedRowsToList(QList<channel> &readySendChannelList);
+    void getAllCheckedRowsToList(QList<channel>* list);
 
     /**
     *   设置所有复选框状态
     */
     void setAllCheckedState(bool state);
-
-    /**
-    *   UI
-    *   获得当前下拉框选择的IP 端口
-    *   @return   ClientInfo    返回获取到下拉框选择的ClientInfo自定义对象
-    */
-    ClientInfo getCurrentClientInfo();
 
     /**
     *   UI
@@ -330,7 +305,7 @@ private:
     *  遍历所有复选框,将勾选的行加入List<DMR>
     *  @param   QList<DMR> &readySendDmrList    存放位置
     */
-    void getAllCheckedRowsToListDmr(QList<DMR> &readySendDmrList);
+    void getAllCheckedRowsToListDmr(QList<DMR> *readySendDmrList);
 
     /**
     *  槽函数
@@ -353,9 +328,8 @@ private:
     */
     void loadLanguageAsync(const QString &langName);
 
-    void handleCommand0x46(TUNER newTuner);
-    void handleCommand0x47(TUNER newTuner);
-    void handleCommand0x48(TUNER newTuner);
-    void showEvent(QShowEvent *event);
+
+    void resetOperationState();
+    void clearAllCommandLists();
 };
 #endif // TERMIAL_H

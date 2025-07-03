@@ -99,6 +99,7 @@ public:
     void addHead(QByteArray &data);
     unsigned int getCallID();
     void setCallID(unsigned int newCallID);
+    void setCallID(const QString &input);
 
     unsigned int getOwnID();
     void setOwnID(unsigned int newOwnID);

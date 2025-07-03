@@ -1,7 +1,54 @@
 #include "tools.h"
 #include <QDebug>
+#include <QJsonDocument>
+#include <QFile>
 
+/**
+ * CRC16校验类
+ * 实现CRC16/CCITT-FALSE校验算法
+ * 用于验证数据的完整性，常用于通信协议中
+ */
+class CRC16Checker {
+public:
+    /**
+     * 计算CRC16校验值
+     * @param buf 待校验的数据缓冲区
+     * @param len 数据长度
+     * @return 计算得到的CRC16校验值
+     */
+    static uint16_t CRC16Check(unsigned char *buf, unsigned char len);
+};
 
+/**
+ * CRC16校验实现
+ * 使用CRC16/CCITT-FALSE算法计算校验值
+ * 多项式：0x1021，初始值：0xFFFF
+ * @param buf 待校验的数据缓冲区
+ * @param len 数据长度
+ * @return 计算得到的CRC16校验值
+ */
+uint16_t CRC16Checker::CRC16Check(unsigned char *buf, unsigned char len) {
+    unsigned char  i, j;
+    uint16_t uncrcReg = 0xFFFF;
+    int16_t uncur;
+    for (i = 0; i < len; i++) {
+        uncur = buf[i] << 8;
+        for (j = 0; j < 8; j++) {
+            if ((int16_t)(uncrcReg ^ uncur) < 0) {
+                uncrcReg = (uncrcReg << 1) ^ 0x1021;
+            } else {
+                uncrcReg <<= 1;
+            }
+            uncur <<= 1;
+        }
+    }
+    return uncrcReg;
+}
+
+/**
+ * Tools类构造函数
+ * @param parent 父对象指针，用于Qt对象树管理
+ */
 Tools::Tools(QObject *parent)
     : QObject{parent}
 {}
@@ -14,57 +61,38 @@ Tools::Tools(QObject *parent)
 * @param    len 要校验的数据的长度
 * @return   uint16_t 校验值
 */
-uint16_t Tools::CRC16Check(unsigned char *buf, unsigned char len)
-{
-    unsigned char  i, j;
-    uint16_t uncrcReg = 0xFFFF;
-    int16_t uncur;
-    for (i = 0; i < len; i++)
-    {
-        uncur = buf[i] << 8;
-        for (j = 0; j < 8; j++)
-        {
-            if ((int16_t)(uncrcReg ^ uncur) < 0)
-            {
-                uncrcReg = (uncrcReg << 1) ^ 0x1021;
-            }
-            else
-            {
-                uncrcReg <<= 1;
-            }
-            uncur <<= 1;
-        }
-    }
-    return uncrcReg;
+uint16_t Tools::CRC16Check(unsigned char *buf, unsigned char len) {
+    return CRC16Checker::CRC16Check(buf, len);
 }
 
+
 /**
- *  数据校验是否正确
- *  检验有无包头 A5 A5 A5 A5
- *  检验包长度
- *  检验CRC是否一致
- *  @param  data    要校验的数据
+ * 数据校验
+ * 校验数据包是否符合规范，包括：
+ * 1. 包头校验（4字节A5）
+ * 2. 长度校验
+ * 3. CRC16校验
+ * @param data 待校验的数据
+ * @return bool 校验通过返回true，否则返回false
  */
 bool Tools::checkData(QByteArray data)
 {
     // 包头校验
     for(int i = 0; i < 4; i++){
         if(static_cast<unsigned char>(data[i]) != 0xA5){
-            qDebug("包头错误");
+            qDebug() << "包头错误，位置：" << i << "，期望值：0xA5，实际值：" << QString::number(static_cast<unsigned char>(data[i]), 16);
             return false;
         }
     }
 
     // 长度校验
     if(static_cast<unsigned char>(data[4]) != data.size()-5){
-        qDebug("长度错误");
+        qDebug() << "长度错误，期望值：" << static_cast<unsigned char>(data[4]) << "，实际值：" << data.size()-5;
         return false;
     }
 
-    // 提取数据部分
-    QByteArray dataPart = data.mid(4, data.size() - 6);
-    unsigned char* dataPartData =reinterpret_cast<unsigned char*>(dataPart.data());
-    uint16_t dataPartCrc = CRC16Check(dataPartData,dataPart.size());
+    // 计算CRC16值
+    uint16_t dataPartCrc = CRC16Check(reinterpret_cast<unsigned char*>(data.data() + 4), data.size() - 6);
 
     char a = dataPartCrc >> 8;
     char b = dataPartCrc;
@@ -73,7 +101,7 @@ bool Tools::checkData(QByteArray data)
     char d = data[data.size()-1];
 
     if(a!=c || b!=d){
-        qDebug("crc错误");
+        qDebug() << "CRC错误，期望值：" << QString::number(dataPartCrc, 16) << "，实际值：" << QString::number((static_cast<uint16_t>(c) << 8) | d, 16);
         return false;
     }
 
@@ -91,6 +119,7 @@ bool Tools::compareCRC(QByteArray data){
 
     // 确保数据长度至少为 7 字节（包头 4 字节 + 包长 1 字节 + 命令位 1 字节 + CRC 2 字节）
     if (data.size() < 7) {
+        qDebug() << "数据长度不足，最小长度：7，实际长度：" << data.size();
         return false;
     }
 
@@ -105,11 +134,8 @@ bool Tools::compareCRC(QByteArray data){
         return false;
     }
 
-    // 提取有效数据部分
-    QByteArray validData = data.mid(4, validDataLength);
-
     // 计算 CRC16 值
-    uint16_t calculatedCRC = CRC16Check(reinterpret_cast<unsigned char*>(validData.data()), static_cast<unsigned char>(validData.size()));
+    uint16_t calculatedCRC = CRC16Check(reinterpret_cast<unsigned char*>(data.data() + 4), static_cast<unsigned char>(validDataLength));
 
     // 提取数据中的 CRC 值
     uint8_t crcH = static_cast<uint8_t>(data[data.size() - 2]);
@@ -120,27 +146,31 @@ bool Tools::compareCRC(QByteArray data){
     if (calculatedCRC == receivedCRC) {
         return true;
     } else {
+        qDebug() << "CRC校验失败，计算值：" << QString::number(calculatedCRC, 16) << "，接收值：" << QString::number(receivedCRC, 16);
         return false;
     }
 
 }
 
 /**
- *  解析数据包
- *  @return QByteArray   返回解析出来正确的数据包
+ * 解析数据包
+ * 从原始数据中提取符合规范的数据包，包括：
+ * 1. 查找包头位置
+ * 2. 验证包长度
+ * 3. 校验CRC
+ * @param data 原始数据
+ * @return QByteArray 解析成功返回有效数据包，失败返回空数据包
  */
 QByteArray Tools::parsePackets(QByteArray data) {
-    QByteArray newData = "";
-
     //包头位置
     int phIndex =  data.indexOf("\xA5\xA5\xA5\xA5");
     if(phIndex == -1){
         // qDebug()<<"没找到包头"<<data.toHex(' ');
-        return newData;
+        return QByteArray();
     }
     if(data.size()<phIndex+5){
         // qDebug()<<"没有包长"<<data.toHex(' ');
-        return newData;
+        return QByteArray();
     }
 
     // 包长位置
@@ -152,10 +182,10 @@ QByteArray Tools::parsePackets(QByteArray data) {
 
     if(data.size() < phIndex + pkpl){
         // qDebug()<<"包长度不对"<<data.toHex(' ');
-        return newData;
+        return QByteArray();
     }
 
-    newData = data.mid(phIndex,phIndex+pkpl);
+    QByteArray newData = data.mid(phIndex,phIndex+pkpl);
     if(!compareCRC(newData)){
         // qDebug()<<"crc校验失败"<<data.toHex(' ');
     }
@@ -165,46 +195,53 @@ QByteArray Tools::parsePackets(QByteArray data) {
 /**
  *  当数据分段到达时 使用此方法获得完整数据
  */
+/**
+ * 分段数据包解析
+ * 处理可能分段的网络数据，包括：
+ * 1. 将新数据追加到缓冲区
+ * 2. 查找完整数据包
+ * 3. 校验CRC
+ * 4. 移除已处理数据
+ * @param data 新接收到的数据
+ * @return QByteArray 解析成功返回有效数据包，失败返回空数据包
+ */
 QByteArray Tools::parsePacketsPlus(QByteArray data){
+
     // 将新接收到的数据添加到缓冲区
     buffer.append(data);
-
-    QByteArray newData = "";
 
     while (true) {
         // 查找包头位置
         int phIndex = buffer.indexOf("\xA5\xA5\xA5\xA5");
         if (phIndex == -1) {
-            // qDebug() << "没找到包头" << buffer.toHex(' ');
+            // 没找到包头，跳出循环
             break;
         }
 
         // 如果包头后面的数据不足，则继续等待更多数据
         if (buffer.size() < phIndex + 5) {
-            // qDebug() << "没有包长" << buffer.toHex(' ');
             break;
         }
 
         // 包长位置
         int plIndex = phIndex + 4;
         // 包长
-        int pl = buffer[plIndex];
+        int pl = static_cast<unsigned char>(buffer[plIndex]);
         // 包含包头和本身的包长
         int pkpl = 5 + pl;
 
         // 如果数据不足以构成一个完整的数据包，则继续等待更多数据
         if (buffer.size() < phIndex + pkpl) {
-            // qDebug() << "包长度不够,数据可能是分段到达" << buffer.toHex(' ');
             break;
         }
 
         // 提取完整的数据包
-        newData = buffer.mid(phIndex, pkpl);
-
+        QByteArray newData = buffer.mid(phIndex, pkpl);
+        qDebug()<<"完整数据包(crc未校验)："<<newData.toHex(' ');
         // 校验CRC
         if (!compareCRC(newData)) {
-            // qDebug() << "crc校验失败" << buffer.toHex(' ');
-            // 如果CRC校验失败，可以选择丢弃当前数据包并继续处理剩余数据
+            qDebug() << "crc校验失败" << buffer.toHex(' ');
+            // 如果CRC校验失败，丢弃当前数据包并继续处理剩余数据
             buffer.remove(0, pkpl);
             continue;
         }
@@ -212,16 +249,17 @@ QByteArray Tools::parsePacketsPlus(QByteArray data){
         // 移除已处理的数据包
         buffer.remove(0, pkpl);
 
-        if(newData[5]!=0x47){
-            qDebug()<<"返回解析出来的数据包:"<<newData.toHex(' ');
+        if(static_cast<unsigned char>(newData[5]) != 0x47){
+            qDebug() << "返回解析出来的数据包:" << newData.toHex(' ');
         }
         // 返回解析出来的数据包
         return newData;
     }
-    return "";
+    return QByteArray();
 }
 
 /**
+ * 弃用
  *  初始化vfo ComboBoxPtr 内容
  */
 void Tools::setVfoComboBoxPtr(QComboBox *&vfoComboBoxPtr){
@@ -239,6 +277,7 @@ void Tools::setVfoComboBoxPtr(QComboBox *&vfoComboBoxPtr){
 }
 
 /**
+ * 弃用
  *  给亚音下拉框添加数据
  */
 void Tools::setYayinComboBoxPtr(QComboBox *&comboBox){
@@ -258,7 +297,6 @@ void Tools::setYayinComboBoxPtr(QComboBox *&comboBox){
     comboBox->addItem("100.0");
     comboBox->addItem("103.5");
     comboBox->addItem("107.2");
-    comboBox->addItem("110.9");
     comboBox->addItem("114.8");
     comboBox->addItem("118.8");
     comboBox->addItem("123.0");
@@ -301,6 +339,7 @@ void Tools::setYayinComboBoxPtr(QComboBox *&comboBox){
 }
 
 /**
+ * 弃用
  *  dmr TX/RX_CTCSS
  *  给下拉框添加数据
  */
@@ -322,7 +361,6 @@ void Tools::setRxTxCtcssComboBoxPtr(QComboBox *&comboBox){
     comboBox->addItem("100.0");
     comboBox->addItem("103.5");
     comboBox->addItem("107.2");
-    comboBox->addItem("110.9");
     comboBox->addItem("114.8");
     comboBox->addItem("118.8");
     comboBox->addItem("123.0");
@@ -360,14 +398,15 @@ void Tools::setRxTxCtcssComboBoxPtr(QComboBox *&comboBox){
 }
 
 /**
+ * 弃用
  *  添加表头
  */
 void Tools::setTableHeader(QStringList &tableCplumnHeader){
     tableCplumnHeader.append("-");
     tableCplumnHeader.append("CHANNEL");
     tableCplumnHeader.append("  NAME  ");
-    tableCplumnHeader.append("VFA_FREQ");
-    tableCplumnHeader.append("VFB_FREQ");
+    tableCplumnHeader.append("VFA_FREQ(Hz)");
+    tableCplumnHeader.append("VFB_FREQ(Hz)");
     tableCplumnHeader.append("VFA_MODE");
     tableCplumnHeader.append("VFB_MODE");
     tableCplumnHeader.append(" T_CTCSS ");
@@ -396,6 +435,12 @@ void Tools::setTableHeader(QStringList &tableCplumnHeader){
  *  @param  const QString& filePath 保存位置
  *  @return bool 是否保存成功 true成功 false失败
  */
+/**
+ * 将JSON对象保存到文件
+ * @param obj 要保存的JSON对象
+ * @param filePath 文件保存路径
+ * @return bool 保存成功返回true，否则返回false
+ */
 bool Tools::saveJsonToFile(const QJsonObject& obj,const QString& filePath){
     QJsonDocument doc(obj);
     QFile file(filePath);
@@ -410,6 +455,11 @@ bool Tools::saveJsonToFile(const QJsonObject& obj,const QString& filePath){
 /**
  *  给data添加CRC
  */
+/**
+ * 为数据添加CRC校验码
+ * 计算数据的CRC16校验值并将其附加到数据末尾
+ * @param data 待处理的数据引用
+ */
 void Tools::addCrc(QByteArray &data)
 {
     // 计算CRC CRC校验不含包头不含自身
@@ -421,6 +471,11 @@ void Tools::addCrc(QByteArray &data)
 }
 /**
  *  给data添加包头
+ */
+/**
+ * 为数据添加包头
+ * 在数据开头添加4字节的A5作为包头标识
+ * @param data 待处理的数据引用
  */
 void Tools::addHead(QByteArray &data)
 {

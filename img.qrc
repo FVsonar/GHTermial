@@ -1,5 +1,14 @@
 <RCC>
     <qresource prefix="/">
         <file>GHTermial.ico</file>
+        <file>img/close.png</file>
+        <file>img/down.png</file>
+        <file>img/flash.png</file>
+        <file>img/maximize.png</file>
+        <file>img/minimize.png</file>
+        <file>img/openJson.png</file>
+        <file>img/readJson.png</file>
+        <file>img/saveJson.png</file>
+        <file>img/up.png</file>
     </qresource>
 </RCC>

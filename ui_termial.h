@@ -10,25 +10,19 @@
 #define UI_TERMIAL_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QComboBox>
-#include <QtWidgets/QDial>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLCDNumber>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QRadioButton>
-#include <QtWidgets/QSlider>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QTabWidget>
-#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTableView>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -38,9 +32,14 @@ class Ui_termial
 {
 public:
     QGridLayout *gridLayout;
-    QHBoxLayout *horizontalLayout;
+    QWidget *widget;
+    QHBoxLayout *horizontalLayout_3;
+    QComboBox *serialport_comboBox;
+    QPushButton *serialportFlash_pushButton;
+    QPushButton *serialportLink_pushButton;
+    QSpacerItem *horizontalSpacer;
+    QComboBox *language_comboBox;
     QTabWidget *tabWidget;
-    QWidget *tab_5;
     QWidget *tab;
     QVBoxLayout *verticalLayout;
     QWidget *data;
@@ -49,155 +48,582 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QPushButton *checkAll_pushButton;
     QPushButton *checkNotAll_pushButton;
-    QLineEdit *channelNum_lineEdit;
-    QProgressBar *load_progressBar;
-    QTableWidget *viewTable_tableWidget;
-    QWidget *tab_2;
-    QWidget *tab_3;
-    QWidget *tab_4;
-    QGridLayout *gridLayout_3;
-    QVBoxLayout *verticalLayout_4;
-    QHBoxLayout *horizontalLayout_10;
-    QLabel *label_13;
-    QLabel *tunerCurrentModel_label;
-    QFrame *line_7;
-    QRadioButton *auto_radioButton;
-    QRadioButton *start_radioButton;
-    QRadioButton *close_radioButton;
-    QVBoxLayout *verticalLayout_5;
-    QLabel *label_5;
-    QLCDNumber *voltage_lcdNumber;
-    QVBoxLayout *verticalLayout_6;
-    QHBoxLayout *horizontalLayout_4;
-    QLabel *label_3;
-    QLabel *swtValue_label;
-    QGridLayout *gridLayout_2;
-    QLabel *label_24;
-    QLabel *label_14;
-    QLabel *label_23;
-    QLabel *label_21;
-    QLabel *label_16;
-    QLabel *label_15;
-    QLabel *label_17;
-    QLabel *label_18;
-    QLabel *label_25;
-    QLabel *label_26;
-    QLabel *label_19;
-    QLabel *label_22;
-    QLabel *label_20;
-    QLabel *label_27;
-    QSlider *swr_horizontalSlider;
-    QHBoxLayout *horizontalLayout_16;
-    QDial *swtValue_dial;
-    QHBoxLayout *horizontalLayout_14;
-    QDoubleSpinBox *swtValue_doubleSpinBox;
-    QHBoxLayout *horizontalLayout_15;
-    QPushButton *SWT_pushButton;
-    QFrame *line_6;
-    QVBoxLayout *verticalLayout_7;
-    QHBoxLayout *horizontalLayout_5;
-    QLabel *label_6;
-    QLabel *PPc_label;
-    QHBoxLayout *horizontalLayout_12;
-    QLabel *label_28;
-    QSlider *PPc_horizontalSlider;
-    QSpinBox *PPcv_spinBox;
-    QVBoxLayout *verticalLayout_8;
-    QHBoxLayout *horizontalLayout_8;
-    QLabel *label_11;
-    QLabel *Swc_label;
-    QHBoxLayout *horizontalLayout_11;
-    QLabel *label_29;
-    QSlider *Swc_horizontalSlider;
-    QSpinBox *Swcv_spinBox;
-    QVBoxLayout *verticalLayout_9;
-    QHBoxLayout *horizontalLayout_9;
-    QLabel *label_12;
-    QLabel *Vc_label;
-    QHBoxLayout *horizontalLayout_13;
-    QLabel *label_30;
-    QSlider *Vc_horizontalSlider;
-    QSpinBox *Vcv_spinBox;
-    QHBoxLayout *horizontalLayout_17;
-    QPushButton *ATC_pushButton;
-    QFrame *line_4;
-    QWidget *control;
-    QVBoxLayout *verticalLayout_3;
-    QLabel *label;
-    QComboBox *language_comboBox;
-    QFrame *line_2;
-    QLabel *label_2;
-    QHBoxLayout *horizontalLayout_3;
+    QPushButton *read_btn;
+    QPushButton *send_btn;
     QPushButton *save_pushButton;
     QPushButton *open_pushButton;
-    QFrame *line;
-    QLabel *label_4;
-    QLabel *label_7;
-    QLineEdit *IPLocal_lineEdit;
-    QLabel *label_8;
-    QLineEdit *tcpPort_lineEdit;
-    QPushButton *tcpOpen_pushButton;
-    QLabel *label_9;
-    QComboBox *connectedDevices_comboBox;
-    QFrame *line_3;
-    QLabel *label_10;
-    QHBoxLayout *horizontalLayout_7;
-    QComboBox *serialport_comboBox;
-    QPushButton *serialportFlash_pushButton;
-    QPushButton *serialportLink_pushButton;
-    QFrame *line_5;
-    QHBoxLayout *horizontalLayout_6;
-    QPushButton *send_btn;
-    QPushButton *read_btn;
+    QSpacerItem *horizontalSpacer_2;
+    QLabel *label_31;
+    QSpinBox *channelMaxNum_spinBox;
+    QLineEdit *channelNum_lineEdit;
+    QProgressBar *load_progressBar;
+    QTableView *tableView;
 
     void setupUi(QWidget *termial)
     {
         if (termial->objectName().isEmpty())
             termial->setObjectName("termial");
-        termial->resize(804, 781);
-#if QT_CONFIG(tooltip)
-        termial->setToolTip(QString::fromUtf8(""));
-#endif // QT_CONFIG(tooltip)
-        termial->setStyleSheet(QString::fromUtf8(""));
-        gridLayout = new QGridLayout(termial);
-        gridLayout->setObjectName("gridLayout");
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName("horizontalLayout");
-        tabWidget = new QTabWidget(termial);
-        tabWidget->setObjectName("tabWidget");
+        termial->resize(1194, 781);
         QSizePolicy sizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(termial->sizePolicy().hasHeightForWidth());
+        termial->setSizePolicy(sizePolicy);
+#if QT_CONFIG(tooltip)
+        termial->setToolTip(QString::fromUtf8(""));
+#endif // QT_CONFIG(tooltip)
+        termial->setStyleSheet(QString::fromUtf8("/* \347\273\210\347\253\257\350\203\214\346\231\257 - \346\267\261\347\201\260\351\273\221\350\211\262 */\n"
+"#termial {\n"
+"    background-color: #1E1F22;\n"
+"}\n"
+"\n"
+"/* ========== QPushButton \346\214\211\351\222\256 ========== */\n"
+"QPushButton {\n"
+"    border: 1px solid #3E4044;\n"
+"    border-radius: 4px;\n"
+"    padding: 8px 15px;\n"
+"    min-height: 18px;\n"
+"    background-color: #2D2F33;\n"
+"    color: #D3D6DB;\n"
+"    font: 14px \"Segoe UI\", \"Microsoft YaHei\", sans-serif;\n"
+"    transition: all 0.2s;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #3A3D42;\n"
+"    border-color: #4E5258;\n"
+"    color: #EFF1F5;\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    background-color: #25272B;\n"
+"    border-color: #5D6066;\n"
+"}\n"
+"\n"
+"QPushButton:disabled {\n"
+"    color: #5A5D61;\n"
+"    background-color: #2A2C30;\n"
+"    border-color: #35373B;\n"
+"}\n"
+"\n"
+"/* ========== QSpinBox \346\225\260\345\255\227\350\276\223\345\205\245\346\241\206 ========== */\n"
+"QSpinBox {\n"
+"    border: "
+                        "1px solid #3E4044;\n"
+"    border-radius: 4px;\n"
+"    padding: 0 25px 0 8px; /* \345\217\263\344\276\247\344\270\272\347\256\255\345\244\264\347\225\231\345\207\272\347\251\272\351\227\264 */\n"
+"	height: 32px;\n"
+"	/*min-width:90px;*/\n"
+"    background-color: #2D2F33;\n"
+"    color: #D3D6DB;\n"
+"    selection-background-color: #3A8EE6;\n"
+"    selection-color: white;\n"
+"    font: 14px \"Segoe UI\", \"Microsoft YaHei\";\n"
+"}\n"
+"\n"
+"/* \347\256\255\345\244\264\346\214\211\351\222\256\351\200\232\347\224\250\346\240\267\345\274\217 */\n"
+"QSpinBox::up-button, QSpinBox::down-button {\n"
+"    subcontrol-origin: border;\n"
+"    width: 20px;\n"
+"    height: 15px; /* \347\262\276\347\241\256\346\216\247\345\210\266\351\253\230\345\272\246 */\n"
+"    border-left: 1px solid #3E4044;\n"
+"    background-color: #35373B;\n"
+"}\n"
+"\n"
+"/* \344\270\212\346\214\211\351\222\256\345\256\232\344\275\215 */\n"
+"QSpinBox::up-button {\n"
+"    subcontrol-position: top right;\n"
+"    top: 1px; /* \345\257\271\351\275\220\350\276"
+                        "\271\346\241\206 */\n"
+"    right: 1px;\n"
+"    border-bottom: 1px solid #3E4044;\n"
+"    border-top-right-radius: 3px;\n"
+"}\n"
+"\n"
+"/* \344\270\213\346\214\211\351\222\256\345\256\232\344\275\215 */\n"
+"QSpinBox::down-button {\n"
+"    subcontrol-position: bottom right;\n"
+"    bottom: 1px; /* \345\257\271\351\275\220\350\276\271\346\241\206 */\n"
+"    right: 1px;\n"
+"    border-bottom-right-radius: 3px;\n"
+"}\n"
+"\n"
+"/* \347\256\255\345\244\264\345\233\276\346\240\207 - \344\275\277\347\224\250SVG\346\210\226PNG */\n"
+"QSpinBox::up-arrow {\n"
+"    image: url(://img/up.png);\n"
+"    width: 10px;\n"
+"    height: 10px;\n"
+"}\n"
+"\n"
+"QSpinBox::down-arrow {\n"
+"    image: url(://img/down.png);\n"
+"    width: 10px;\n"
+"    height: 10px;\n"
+"}\n"
+"\n"
+"/* \346\202\254\345\201\234\347\212\266\346\200\201 */\n"
+"QSpinBox::up-button:hover, QSpinBox::down-button:hover {\n"
+"    background-color: #3E4044;\n"
+"}\n"
+"\n"
+"QSpinBox::up-arrow:hover {\n"
+"    image: url(://img/up.png);\n"
+"}\n"
+"\n"
+"QSpinBox::down-arrow:"
+                        "hover {\n"
+"    image: url(://img/down.png);\n"
+"}\n"
+"\n"
+"/* \346\214\211\344\270\213\347\212\266\346\200\201 */\n"
+"QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {\n"
+"    background-color: #2A2C30;\n"
+"}\n"
+"\n"
+"/* \347\246\201\347\224\250\347\212\266\346\200\201 */\n"
+"QSpinBox:disabled, \n"
+"QSpinBox::up-button:disabled, \n"
+"QSpinBox::down-button:disabled {\n"
+"    background-color: #25272A;\n"
+"    color: #5C5F66;\n"
+"}\n"
+"\n"
+"QSpinBox::up-arrow:disabled, \n"
+"QSpinBox::down-arrow:disabled {\n"
+"    opacity: 0.5;\n"
+"}\n"
+"/* ========== QLineEdit \350\276\223\345\205\245\346\241\206 ========== */\n"
+"QLineEdit {\n"
+"    border: 1px solid #3E4044;\n"
+"    border-radius: 4px;\n"
+"    padding: 0 15px;\n"
+"    height: 33px;\n"
+"    background-color: #2D2F33;\n"
+"    color: #D3D6DB;\n"
+"    selection-background-color: #3A8EE6;\n"
+"}\n"
+"\n"
+"QLineEdit:hover {\n"
+"    border-color: #4E5258;\n"
+"}\n"
+"\n"
+"QLineEdit:focus {\n"
+"    border-color: #3A8EE6;\n"
+"}\n"
+"\n"
+"QLineEdit::placeholder {"
+                        "\n"
+"    color: #6A6D72;\n"
+"    font-style: italic;\n"
+"}\n"
+"\n"
+"/* ========== QComboBox \344\270\213\346\213\211\346\241\206 ========== */\n"
+"/* ========== QComboBox \345\237\272\347\241\200\346\240\267\345\274\217 ========== */\n"
+"QComboBox {\n"
+"    border: 1px solid #45474C;\n"
+"    border-radius: 4px;\n"
+"    padding: 0 30px 0 12px;  /* \345\217\263\344\276\247\347\225\231\345\207\272\344\270\213\346\213\211\346\214\211\351\222\256\347\251\272\351\227\264 */\n"
+"    min-height: 32px;\n"
+"    background-color: #2B2D30;\n"
+"    color: #E0E3E9;\n"
+"    font: 14px \"Segoe UI\", \"Microsoft YaHei\", sans-serif;\n"
+"    selection-background-color: #3A8EE6;\n"
+"    selection-color: white;\n"
+"}\n"
+"\n"
+"/* \345\217\257\347\274\226\350\276\221\347\212\266\346\200\201\347\211\271\346\256\212\345\244\204\347\220\206 */\n"
+"QComboBox:editable {\n"
+"    padding-right: 30px;  /* \347\241\256\344\277\235\347\274\226\350\276\221\346\241\206\344\270\215\344\274\232\350\246\206\347\233\226\344\270\213\346\213\211\346"
+                        "\214\211\351\222\256 */\n"
+"}\n"
+"\n"
+"/* \344\270\213\346\213\211\346\214\211\351\222\256\345\256\232\344\275\215\344\277\256\346\255\243 */\n"
+"QComboBox::drop-down {\n"
+"    subcontrol-origin: padding;\n"
+"    subcontrol-position: top right;\n"
+"    width: 30px;\n"
+"    border-left: 1px solid #45474C;\n"
+"    border-top-right-radius: 3px;\n"
+"    border-bottom-right-radius: 3px;\n"
+"    background-color: #35373B;\n"
+"    right: 1px;  /* \345\257\271\351\275\220\350\276\271\346\241\206 */\n"
+"}\n"
+"\n"
+"/* \344\270\213\346\213\211\347\256\255\345\244\264\345\233\276\346\240\207 */\n"
+"QComboBox::down-arrow {\n"
+"    image: url(://img/down.png);\n"
+"    width: 12px;\n"
+"    height: 12px;\n"
+"}\n"
+"\n"
+"/* \347\247\273\351\231\244\345\217\257\347\274\226\350\276\221\346\241\206\347\232\204\345\206\205\347\275\256\344\270\213\346\213\211\346\214\207\347\244\272\345\231\250 */\n"
+"QComboBox::drop-down:editable {\n"
+"    width: 0;\n"
+"    border: none;\n"
+"}\n"
+"/* \344\270\213\346\213\211\350\217\234\345\215\225"
+                        "\351\235\242\346\235\277 */\n"
+"QComboBox QAbstractItemView {\n"
+"    border: 1px solid #45474C;\n"
+"    border-top: none;\n"
+"    border-radius: 0 0 4px 4px;\n"
+"    background-color: #2B2D30;\n"
+"    padding: 4px 0;\n"
+"    outline: none;\n"
+"    margin-top: 2px; /* \346\266\210\351\231\244\344\270\216\344\270\273\346\216\247\344\273\266\347\232\204\351\227\264\351\232\231 */\n"
+"}\n"
+"\n"
+"/* \344\270\213\346\213\211\350\217\234\345\215\225\344\270\255\347\232\204\351\241\271 */\n"
+"QComboBox QAbstractItemView::item {\n"
+"    min-height: 32px;\n"
+"    padding: 0 12px;\n"
+"    color: #D8DBE2;\n"
+"    background-color: transparent;\n"
+"}\n"
+"\n"
+"/* \351\241\271\346\202\254\345\201\234\347\212\266\346\200\201 */\n"
+"QComboBox QAbstractItemView::item:hover {\n"
+"    background-color: #35373B;\n"
+"}\n"
+"\n"
+"/* \351\241\271\351\200\211\344\270\255\347\212\266\346\200\201 */\n"
+"QComboBox QAbstractItemView::item:selected {\n"
+"    background-color: #3A8EE6;\n"
+"    color: white;\n"
+"}\n"
+"\n"
+"/* \345\217\257\347"
+                        "\274\226\350\276\221\347\273\204\345\220\210\346\241\206\347\232\204\347\274\226\350\276\221\345\214\272\345\237\237 */\n"
+"QComboBox QLineEdit {\n"
+"    padding: 0 8px;\n"
+"    background: transparent;\n"
+"    color: #E0E3E9;\n"
+"    border: none;\n"
+"    selection-background-color: #3A8EE6;\n"
+"}\n"
+"\n"
+"/* \345\217\257\347\274\226\350\276\221\347\273\204\345\220\210\346\241\206\347\232\204\347\274\226\350\276\221\345\214\272\345\237\237\347\246\201\347\224\250\347\212\266\346\200\201 */\n"
+"QComboBox:disabled QLineEdit {\n"
+"    color: #5C5F66;\n"
+"}\n"
+"/* ========== \345\205\250\345\261\200\345\242\236\345\274\272 ========== */\n"
+"/* \347\273\237\344\270\200\347\246\201\347\224\250\347\212\266\346\200\201\346\240\267\345\274\217 */\n"
+"QSpinBox:disabled, QLineEdit:disabled, QComboBox:disabled {\n"
+"    color: #5A5D61;\n"
+"    background-color: #25272A;\n"
+"    border-color: #303235;\n"
+"}\n"
+"\n"
+"/* \347\273\237\344\270\200\347\204\246\347\202\271\346\225\210\346\236\234 */\n"
+"*:focus {\n"
+"    outlin"
+                        "e: none;\n"
+"}\n"
+"\n"
+"/* \346\273\232\345\212\250\346\235\241\346\240\267\345\274\217 */\n"
+"QScrollBar:vertical {\n"
+"    background: #25272A;\n"
+"    width: 10px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #3E4044;\n"
+"    min-height: 20px;\n"
+"    border-radius: 5px;\n"
+"}"));
+        gridLayout = new QGridLayout(termial);
+        gridLayout->setObjectName("gridLayout");
+        widget = new QWidget(termial);
+        widget->setObjectName("widget");
+        QSizePolicy sizePolicy1(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Maximum);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(widget->sizePolicy().hasHeightForWidth());
+        widget->setSizePolicy(sizePolicy1);
+        widget->setMinimumSize(QSize(0, 50));
+        widget->setStyleSheet(QString::fromUtf8(""));
+        horizontalLayout_3 = new QHBoxLayout(widget);
+        horizontalLayout_3->setObjectName("horizontalLayout_3");
+        serialport_comboBox = new QComboBox(widget);
+        serialport_comboBox->setObjectName("serialport_comboBox");
+        serialport_comboBox->setEnabled(true);
+        QSizePolicy sizePolicy2(QSizePolicy::Policy::Maximum, QSizePolicy::Policy::Maximum);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(serialport_comboBox->sizePolicy().hasHeightForWidth());
+        serialport_comboBox->setSizePolicy(sizePolicy2);
+        serialport_comboBox->setMinimumSize(QSize(0, 34));
+        serialport_comboBox->setMaximumSize(QSize(16777215, 16777215));
+        serialport_comboBox->setSizeIncrement(QSize(210, 0));
+        serialport_comboBox->setStyleSheet(QString::fromUtf8(""));
+
+        horizontalLayout_3->addWidget(serialport_comboBox);
+
+        serialportFlash_pushButton = new QPushButton(widget);
+        serialportFlash_pushButton->setObjectName("serialportFlash_pushButton");
+        sizePolicy.setHeightForWidth(serialportFlash_pushButton->sizePolicy().hasHeightForWidth());
+        serialportFlash_pushButton->setSizePolicy(sizePolicy);
+        serialportFlash_pushButton->setMinimumSize(QSize(0, 36));
+        serialportFlash_pushButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
+"    border-radius: 17px;  /* \350\256\251\346\214\211\351\222\256\345\217\230\346\210\220\345\234\206\345\275\242 */\n"
+"    border: none;\n"
+"    font-weight: bold;\n"
+"	width: 8px;\n"
+"    height: 20px;\n"
+"	background-image: url(\"://img/flash.png\");\n"
+"    background-repeat: no-repeat;  /* \347\246\201\346\255\242\345\233\276\347\211\207\351\207\215\345\244\215 */\n"
+"    background-position: center;  /* \345\233\276\347\211\207\345\261\205\344\270\255 */\n"
+"    background-clip: padding-box;  /* \347\241\256\344\277\235\350\203\214\346\231\257\345\217\252\345\234\250padding\345\214\272\345\237\237\345\206\205 */\n"
+"}"));
+
+        horizontalLayout_3->addWidget(serialportFlash_pushButton);
+
+        serialportLink_pushButton = new QPushButton(widget);
+        serialportLink_pushButton->setObjectName("serialportLink_pushButton");
+        sizePolicy.setHeightForWidth(serialportLink_pushButton->sizePolicy().hasHeightForWidth());
+        serialportLink_pushButton->setSizePolicy(sizePolicy);
+        serialportLink_pushButton->setStyleSheet(QString::fromUtf8("QPushButton.success {\n"
+"    background-color: #67C23A;\n"
+"    border-color: #67C23A;\n"
+"    color: white;\n"
+"}\n"
+"\n"
+"QPushButton.success:hover {\n"
+"    background-color: #85ce61;\n"
+"    border-color: #85ce61;\n"
+"}\n"
+"\n"
+"QPushButton.success:pressed {\n"
+"    background-color: #5daf34;\n"
+"    border-color: #5daf34;\n"
+"}\n"
+"\n"
+"QPushButton.success:disabled {\n"
+"    background-color: #C8E6C9;\n"
+"    border-color: #C8E6C9;\n"
+"    color: white;\n"
+"}"));
+
+        horizontalLayout_3->addWidget(serialportLink_pushButton);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        horizontalLayout_3->addItem(horizontalSpacer);
+
+        language_comboBox = new QComboBox(widget);
+        language_comboBox->setObjectName("language_comboBox");
+        sizePolicy2.setHeightForWidth(language_comboBox->sizePolicy().hasHeightForWidth());
+        language_comboBox->setSizePolicy(sizePolicy2);
+        language_comboBox->setMinimumSize(QSize(0, 34));
+        language_comboBox->setAcceptDrops(false);
+        language_comboBox->setStyleSheet(QString::fromUtf8(""));
+
+        horizontalLayout_3->addWidget(language_comboBox);
+
+
+        gridLayout->addWidget(widget, 0, 0, 1, 1);
+
+        tabWidget = new QTabWidget(termial);
+        tabWidget->setObjectName("tabWidget");
         sizePolicy.setHeightForWidth(tabWidget->sizePolicy().hasHeightForWidth());
         tabWidget->setSizePolicy(sizePolicy);
-        tab_5 = new QWidget();
-        tab_5->setObjectName("tab_5");
-        tabWidget->addTab(tab_5, QString());
+        tabWidget->setStyleSheet(QString::fromUtf8("/* ========== QTabWidget \344\270\273\345\256\271\345\231\250 ========== */\n"
+"QTabWidget {\n"
+"    background: transparent;\n"
+"    border: none;\n"
+"}\n"
+"\n"
+"/* ========== \346\240\207\347\255\276\346\240\217\346\240\267\345\274\217 ========== */\n"
+"QTabWidget::pane {\n"
+"    border: 1px solid #3A3C40;\n"
+"    border-radius: 4px;\n"
+"    background: #25272B;\n"
+"    margin: 0;\n"
+"    padding: 0;\n"
+"    top: -1px; /* \346\266\210\351\231\244\344\270\216\346\240\207\347\255\276\347\232\204\351\227\264\351\232\231 */\n"
+"}\n"
+"\n"
+"QTabWidget::tab-bar {\n"
+"    alignment: left;\n"
+"    left: 8px; /* \346\240\207\347\255\276\346\240\217\345\267\246\344\276\247\345\201\217\347\247\273 */\n"
+"}\n"
+"\n"
+"/* ========== \345\215\225\344\270\252\346\240\207\347\255\276\346\240\267\345\274\217 ========== */\n"
+"QTabBar::tab {\n"
+"    background: #2D2F33;\n"
+"    color: #B0B3B8;\n"
+"    border: 1px solid #3A3C40;\n"
+"    border-bottom: none;\n"
+"    border-top-left-radius: 4px;\n"
+"    border-top-right-radius: 4px"
+                        ";\n"
+"    padding: 8px 16px;\n"
+"    margin-right: 4px;\n"
+"    min-width: 80px;\n"
+"    font: 14px \"Segoe UI\", \"Microsoft YaHei\";\n"
+"}\n"
+"\n"
+"/* \346\202\254\345\201\234\347\212\266\346\200\201 */\n"
+"QTabBar::tab:hover {\n"
+"    background: #35373B;\n"
+"    color: #D3D6DB;\n"
+"}\n"
+"\n"
+"/* \351\200\211\344\270\255\347\212\266\346\200\201 */\n"
+"QTabBar::tab:selected {\n"
+"    background: #25272B;\n"
+"    color: #E0E3E9;\n"
+"    border-color: #3A3C40;\n"
+"    border-bottom: 1px solid #25272B; /* \344\270\216\345\206\205\345\256\271\345\214\272\345\237\237\350\236\215\345\220\210 */\n"
+"    margin-bottom: -1px; /* \344\270\213\347\247\2731px\350\246\206\347\233\226\345\206\205\345\256\271\345\214\272\350\276\271\346\241\206 */\n"
+"}\n"
+"\n"
+"/* \351\235\236\351\200\211\344\270\255\347\212\266\346\200\201 */\n"
+"QTabBar::tab:!selected {\n"
+"    margin-top: 2px; /* \350\247\206\350\247\211\344\270\212\351\231\215\344\275\216\346\234\252\351\200\211\346\240\207\347\255\276 */\n"
+"}\n"
+"\n"
+"/* \347\246\201"
+                        "\347\224\250\347\212\266\346\200\201 */\n"
+"QTabBar::tab:disabled {\n"
+"    color: #5C5F66;\n"
+"    background: #2A2C30;\n"
+"}\n"
+"\n"
+"/* ========== \346\240\207\347\255\276\346\240\217\350\247\222\350\220\275\346\216\247\344\273\266 ========== */\n"
+"QTabBar::scroller {\n"
+"    width: 20px;\n"
+"    background: #2D2F33;\n"
+"}\n"
+"\n"
+"QTabBar QToolButton {\n"
+"    background: #2D2F33;\n"
+"    border: 1px solid #3A3C40;\n"
+"}\n"
+"\n"
+"/* ========== \345\206\205\345\256\271\345\214\272\345\237\237\346\240\267\345\274\217 ========== */\n"
+"QTabWidget::tab-contents {\n"
+"    background: #25272B;\n"
+"    border-top: none;\n"
+"    border-radius: 0 0 4px 4px;\n"
+"}"));
         tab = new QWidget();
         tab->setObjectName("tab");
+        tab->setStyleSheet(QString::fromUtf8(""));
         verticalLayout = new QVBoxLayout(tab);
         verticalLayout->setObjectName("verticalLayout");
         data = new QWidget(tab);
         data->setObjectName("data");
+        data->setStyleSheet(QString::fromUtf8(""));
         verticalLayout_2 = new QVBoxLayout(data);
         verticalLayout_2->setObjectName("verticalLayout_2");
         tools = new QWidget(data);
         tools->setObjectName("tools");
+        tools->setStyleSheet(QString::fromUtf8("#tools{\n"
+"	background-color: #3C3D3F;\n"
+"	border-radius: 15px\n"
+"}"));
         horizontalLayout_2 = new QHBoxLayout(tools);
         horizontalLayout_2->setObjectName("horizontalLayout_2");
         horizontalLayout_2->setSizeConstraint(QLayout::SizeConstraint::SetDefaultConstraint);
         checkAll_pushButton = new QPushButton(tools);
         checkAll_pushButton->setObjectName("checkAll_pushButton");
+        QSizePolicy sizePolicy3(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Fixed);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(checkAll_pushButton->sizePolicy().hasHeightForWidth());
+        checkAll_pushButton->setSizePolicy(sizePolicy3);
 
         horizontalLayout_2->addWidget(checkAll_pushButton);
 
         checkNotAll_pushButton = new QPushButton(tools);
         checkNotAll_pushButton->setObjectName("checkNotAll_pushButton");
+        sizePolicy3.setHeightForWidth(checkNotAll_pushButton->sizePolicy().hasHeightForWidth());
+        checkNotAll_pushButton->setSizePolicy(sizePolicy3);
+        checkNotAll_pushButton->setMinimumSize(QSize(0, 36));
+        checkNotAll_pushButton->setStyleSheet(QString::fromUtf8(""));
 
         horizontalLayout_2->addWidget(checkNotAll_pushButton);
 
+        read_btn = new QPushButton(tools);
+        read_btn->setObjectName("read_btn");
+        sizePolicy.setHeightForWidth(read_btn->sizePolicy().hasHeightForWidth());
+        read_btn->setSizePolicy(sizePolicy);
+        read_btn->setStyleSheet(QString::fromUtf8(""));
+
+        horizontalLayout_2->addWidget(read_btn);
+
+        send_btn = new QPushButton(tools);
+        send_btn->setObjectName("send_btn");
+        sizePolicy.setHeightForWidth(send_btn->sizePolicy().hasHeightForWidth());
+        send_btn->setSizePolicy(sizePolicy);
+        send_btn->setStyleSheet(QString::fromUtf8(""));
+
+        horizontalLayout_2->addWidget(send_btn);
+
+        save_pushButton = new QPushButton(tools);
+        save_pushButton->setObjectName("save_pushButton");
+        sizePolicy.setHeightForWidth(save_pushButton->sizePolicy().hasHeightForWidth());
+        save_pushButton->setSizePolicy(sizePolicy);
+        save_pushButton->setStyleSheet(QString::fromUtf8("/*QPushButton{\n"
+"	background-image: url(\"://img/saveJson.png\");\n"
+"    background-repeat: no-repeat;  \n"
+"    background-position: center;  \n"
+"    background-clip: padding-box;\n"
+"}\n"
+"*/"));
+
+        horizontalLayout_2->addWidget(save_pushButton);
+
+        open_pushButton = new QPushButton(tools);
+        open_pushButton->setObjectName("open_pushButton");
+        sizePolicy.setHeightForWidth(open_pushButton->sizePolicy().hasHeightForWidth());
+        open_pushButton->setSizePolicy(sizePolicy);
+        open_pushButton->setStyleSheet(QString::fromUtf8(" /*QPushButton{\n"
+"	background-image: url(\"://img/openJson.png\");\n"
+"    background-repeat: no-repeat;  \n"
+"    background-position: center;  \n"
+"    background-clip: padding-box;\n"
+"}*/"));
+
+        horizontalLayout_2->addWidget(open_pushButton);
+
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        horizontalLayout_2->addItem(horizontalSpacer_2);
+
+        label_31 = new QLabel(tools);
+        label_31->setObjectName("label_31");
+        sizePolicy.setHeightForWidth(label_31->sizePolicy().hasHeightForWidth());
+        label_31->setSizePolicy(sizePolicy);
+        label_31->setMinimumSize(QSize(0, 0));
+        label_31->setAcceptDrops(false);
+        label_31->setStyleSheet(QString::fromUtf8("#label_31{\n"
+"color:rgb(255, 255, 255)\n"
+"}"));
+        label_31->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+
+        horizontalLayout_2->addWidget(label_31);
+
+        channelMaxNum_spinBox = new QSpinBox(tools);
+        channelMaxNum_spinBox->setObjectName("channelMaxNum_spinBox");
+        sizePolicy3.setHeightForWidth(channelMaxNum_spinBox->sizePolicy().hasHeightForWidth());
+        channelMaxNum_spinBox->setSizePolicy(sizePolicy3);
+        channelMaxNum_spinBox->setStyleSheet(QString::fromUtf8("#channelMaxNum_spinBox{\n"
+"	min-width:90px;\n"
+"}"));
+        channelMaxNum_spinBox->setMaximum(1000);
+        channelMaxNum_spinBox->setValue(10);
+
+        horizontalLayout_2->addWidget(channelMaxNum_spinBox);
+
         channelNum_lineEdit = new QLineEdit(tools);
         channelNum_lineEdit->setObjectName("channelNum_lineEdit");
+        QSizePolicy sizePolicy4(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Fixed);
+        sizePolicy4.setHorizontalStretch(0);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(channelNum_lineEdit->sizePolicy().hasHeightForWidth());
+        channelNum_lineEdit->setSizePolicy(sizePolicy4);
 
         horizontalLayout_2->addWidget(channelNum_lineEdit);
 
@@ -210,764 +636,194 @@ public:
 
         verticalLayout_2->addWidget(tools);
 
-        viewTable_tableWidget = new QTableWidget(data);
-        viewTable_tableWidget->setObjectName("viewTable_tableWidget");
-        QSizePolicy sizePolicy1(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(viewTable_tableWidget->sizePolicy().hasHeightForWidth());
-        viewTable_tableWidget->setSizePolicy(sizePolicy1);
+        tableView = new QTableView(data);
+        tableView->setObjectName("tableView");
+        tableView->setStyleSheet(QString::fromUtf8("/* ========== \345\237\272\347\241\200\350\241\250\346\240\274\346\240\267\345\274\217 ========== */\n"
+"QTableView {\n"
+"    border: 1px solid #3A3C40;\n"
+"    background-color: #25272B;  /* \346\257\224\344\270\273\350\203\214\346\231\257\347\250\215\346\265\205\347\232\204\346\267\261\350\211\262 */\n"
+"    gridline-color: #3A3C40;\n"
+"    border-radius: 4px;\n"
+"    font-family: \"Segoe UI\", \"Microsoft YaHei\", sans-serif;\n"
+"    font-size: 14px;  /* \347\250\215\345\260\217\347\232\204\345\255\227\345\217\267\346\217\220\351\253\230\345\217\257\350\257\273\346\200\247 */\n"
+"    selection-background-color: #3A5F8A;\n"
+"    selection-color: #E0E2E5;\n"
+"    outline: 0;\n"
+"    alternate-background-color: #2D2F33;  /* \344\272\244\346\233\277\350\241\214\351\242\234\350\211\262 */\n"
+"}\n"
+"\n"
+"/* ========== \350\241\250\345\244\264\346\240\267\345\274\217 ========== */\n"
+"QHeaderView {\n"
+"    background-color: #2D2F33;  /* \346\257\224\350\241\250\346\240\274\350\203\214\346\231\257\347\225\245\344\272"
+                        "\256 */\n"
+"    border: none;\n"
+"    border-bottom: 1px solid #3A3C40;\n"
+"}\n"
+"\n"
+"QHeaderView::section {\n"
+"    background-color: transparent;\n"
+"    color: #C5C8CF;\n"
+"    padding: 8px 0;  /* \345\207\217\345\260\221\345\206\205\350\276\271\350\267\235 */\n"
+"    border: none;\n"
+"    border-right: 1px solid #3A3C40;\n"
+"    font-weight: 600;  /* \345\212\240\347\262\227\350\241\250\345\244\264\346\226\207\345\255\227 */\n"
+"}\n"
+"\n"
+"QHeaderView::section:hover {\n"
+"    background-color: #35373B;  /* \346\202\254\345\201\234\346\225\210\346\236\234 */\n"
+"}\n"
+"\n"
+"QHeaderView::section:checked {\n"
+"    background-color: #3A5F8A;  /* \351\200\211\344\270\255\347\212\266\346\200\201\344\275\277\347\224\250\344\270\273\351\242\230\350\223\235\350\211\262 */\n"
+"    color: white;\n"
+"}\n"
+"\n"
+"/* ========== \345\215\225\345\205\203\346\240\274\346\240\267\345\274\217 ========== */\n"
+"QTableView::item {\n"
+"    color: #D3D6DB;\n"
+"    border-bottom: 1px solid #3A3C40;\n"
+"    /*padding: 6px 8px;   \351"
+                        "\200\202\344\270\255\347\232\204\345\206\205\350\276\271\350\267\235 */\n"
+"}\n"
+"\n"
+"/* \344\272\244\346\233\277\350\241\214\351\242\234\350\211\262 - \346\257\224\345\237\272\347\241\200\350\203\214\346\231\257\347\250\215\344\272\256 */\n"
+"QTableView::item:alternate {\n"
+"    background-color: #2A2C30;\n"
+"}\n"
+"\n"
+"/* \346\202\254\345\201\234\346\225\210\346\236\234 - \344\275\277\347\224\250\345\215\212\351\200\217\346\230\216\350\223\235\350\211\262 */\n"
+"QTableView::item:hover {\n"
+"    background-color: rgba(58, 143, 230, 0.15);\n"
+"}\n"
+"\n"
+"/* \351\200\211\344\270\255\350\241\214\346\240\267\345\274\217 - \346\267\261\350\223\235\350\211\262 */\n"
+"QTableView::item:selected {\n"
+"    background-color: #3A5F8A;\n"
+"    color: white;\n"
+"}\n"
+"\n"
+"/* \351\200\211\344\270\255\350\241\214\344\275\206\346\227\240\347\204\246\347\202\271\346\227\266\347\232\204\346\240\267\345\274\217 */\n"
+"QTableView::item:selected:!active {\n"
+"    background-color: #2D4A6B;\n"
+"}\n"
+"\n"
+"/* ========== \350\241\250"
+                        "\346\240\274\350\247\222\351\203\250\346\240\267\345\274\217 ========== */\n"
+"QTableCornerButton::section {\n"
+"    background-color: #2D2F33;\n"
+"    border: none;\n"
+"    border-bottom: 1px solid #3A3C40;\n"
+"    border-right: 1px solid #3A3C40;\n"
+"}\n"
+"\n"
+"/* ========== \346\273\232\345\212\250\346\235\241\346\240\267\345\274\217 ========== */\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: #25272B;\n"
+"    width: 10px;  /* \347\250\215\345\256\275\347\232\204\346\273\232\345\212\250\346\235\241 */\n"
+"    margin: 0;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical {\n"
+"    background: #3E4044;\n"
+"    border-radius: 5px;\n"
+"    min-height: 30px;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:vertical:hover {\n"
+"    background: #4A4D51;\n"
+"}\n"
+"\n"
+"QScrollBar:horizontal {\n"
+"    border: none;\n"
+"    background: #25272B;\n"
+"    height: 10px;\n"
+"    margin: 0;\n"
+"}\n"
+"\n"
+"QScrollBar::handle:horizontal {\n"
+"    background: #3E4044;\n"
+"    border-radius: 5px;\n"
+"    min-width: 30px;\n"
+"}\n"
+""
+                        "\n"
+"/* \347\247\273\351\231\244\346\273\232\345\212\250\346\235\241\347\256\255\345\244\264 */\n"
+"QScrollBar::add-line, QScrollBar::sub-line,\n"
+"QScrollBar::add-page, QScrollBar::sub-page {\n"
+"    background: none;\n"
+"    border: none;\n"
+"}\n"
+"\n"
+"/* ========== \347\211\271\346\256\212\347\212\266\346\200\201 ========== */\n"
+"/* \347\246\201\347\224\250\347\212\266\346\200\201 */\n"
+"QTableView:disabled {\n"
+"    color: #6A6D72;\n"
+"    background-color: #25272B;\n"
+"}\n"
+"\n"
+"/* \345\217\252\350\257\273\347\212\266\346\200\201 */\n"
+"QTableView:read-only {\n"
+"    background-color: #25272B;\n"
+"}\n"
+"QCheckBox {\n"
+"    color: #D3D6DB;\n"
+"    spacing: 8px;\n"
+"    padding: 2px;\n"
+"}\n"
+"\n"
+"QCheckBox::indicator {\n"
+"    width: 16px;\n"
+"    height: 16px;\n"
+"    border: 1px solid #3A3C40;\n"
+"    border-radius: 3px;\n"
+"    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,\n"
+"                stop:0 #2D2F33, stop:1 #25272B);\n"
+"    transition: all 0.3s ease;  /* \345\271\263\346\273\221\350\277"
+                        "\207\346\270\241\346\225\210\346\236\234 */\n"
+"}\n"
+"\n"
+"QCheckBox::indicator:checked {\n"
+"    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,\n"
+"                stop:0 #3A5F8A, stop:1 #2D4A6B);\n"
+"    image: url(:/icons/checkmark_white.svg);\n"
+"    transform: scale(1.05);  /* \350\275\273\345\276\256\346\224\276\345\244\247\346\225\210\346\236\234 */\n"
+"}\n"
+"\n"
+"/* ========== \344\270\215\345\217\257\347\274\226\350\276\221\345\215\225\345\205\203\346\240\274\346\240\267\345\274\217 ========== */\n"
+"/* \344\275\277\347\224\250\345\261\236\346\200\247\351\200\211\346\213\251\345\231\250\346\235\245\347\262\276\347\241\256\345\214\271\351\205\215\344\270\215\345\217\257\347\274\226\350\276\221\345\215\225\345\205\203\346\240\274 */\n"
+"QTableView::item[readOnly=\"true\"] {\n"
+"    background-color: #2A2C30;\n"
+"    color: #8A8D93;\n"
+"    border-right: 1px dashed #3A3C40;\n"
+"}\n"
+"\n"
+"/* \344\272\244\346\233\277\350\241\214\344\270\255\347\232\204\344\270\215\345\217\257\347\274\226\350\276\221\345"
+                        "\215\225\345\205\203\346\240\274 */\n"
+"QTableView::item[readOnly=\"true\"]:alternate {\n"
+"    background-color: #25272B;\n"
+"}\n"
+"\n"
+"/* \351\200\211\344\270\255\347\212\266\346\200\201\344\270\213\347\232\204\344\270\215\345\217\257\347\274\226\350\276\221\345\215\225\345\205\203\346\240\274 */\n"
+"QTableView::item[readOnly=\"true\"]:selected {\n"
+"    background-color: #2D4A6B;\n"
+"    color: #B0B3B8;\n"
+"}\n"
+""));
 
-        verticalLayout_2->addWidget(viewTable_tableWidget);
+        verticalLayout_2->addWidget(tableView);
 
 
         verticalLayout->addWidget(data);
 
         tabWidget->addTab(tab, QString());
-        tab_2 = new QWidget();
-        tab_2->setObjectName("tab_2");
-        tabWidget->addTab(tab_2, QString());
-        tab_3 = new QWidget();
-        tab_3->setObjectName("tab_3");
-        tabWidget->addTab(tab_3, QString());
-        tab_4 = new QWidget();
-        tab_4->setObjectName("tab_4");
-        gridLayout_3 = new QGridLayout(tab_4);
-        gridLayout_3->setObjectName("gridLayout_3");
-        verticalLayout_4 = new QVBoxLayout();
-        verticalLayout_4->setObjectName("verticalLayout_4");
-        horizontalLayout_10 = new QHBoxLayout();
-        horizontalLayout_10->setObjectName("horizontalLayout_10");
-        label_13 = new QLabel(tab_4);
-        label_13->setObjectName("label_13");
-        label_13->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
 
-        horizontalLayout_10->addWidget(label_13);
-
-        tunerCurrentModel_label = new QLabel(tab_4);
-        tunerCurrentModel_label->setObjectName("tunerCurrentModel_label");
-        tunerCurrentModel_label->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_10->addWidget(tunerCurrentModel_label);
-
-
-        verticalLayout_4->addLayout(horizontalLayout_10);
-
-        line_7 = new QFrame(tab_4);
-        line_7->setObjectName("line_7");
-        line_7->setFrameShape(QFrame::Shape::HLine);
-        line_7->setFrameShadow(QFrame::Shadow::Sunken);
-
-        verticalLayout_4->addWidget(line_7);
-
-        auto_radioButton = new QRadioButton(tab_4);
-        auto_radioButton->setObjectName("auto_radioButton");
-        QSizePolicy sizePolicy2(QSizePolicy::Policy::Maximum, QSizePolicy::Policy::Fixed);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(auto_radioButton->sizePolicy().hasHeightForWidth());
-        auto_radioButton->setSizePolicy(sizePolicy2);
-
-        verticalLayout_4->addWidget(auto_radioButton);
-
-        start_radioButton = new QRadioButton(tab_4);
-        start_radioButton->setObjectName("start_radioButton");
-        sizePolicy2.setHeightForWidth(start_radioButton->sizePolicy().hasHeightForWidth());
-        start_radioButton->setSizePolicy(sizePolicy2);
-
-        verticalLayout_4->addWidget(start_radioButton);
-
-        close_radioButton = new QRadioButton(tab_4);
-        close_radioButton->setObjectName("close_radioButton");
-        sizePolicy2.setHeightForWidth(close_radioButton->sizePolicy().hasHeightForWidth());
-        close_radioButton->setSizePolicy(sizePolicy2);
-
-        verticalLayout_4->addWidget(close_radioButton);
-
-
-        gridLayout_3->addLayout(verticalLayout_4, 0, 0, 1, 1);
-
-        verticalLayout_5 = new QVBoxLayout();
-        verticalLayout_5->setObjectName("verticalLayout_5");
-        label_5 = new QLabel(tab_4);
-        label_5->setObjectName("label_5");
-        QSizePolicy sizePolicy3(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Maximum);
-        sizePolicy3.setHorizontalStretch(0);
-        sizePolicy3.setVerticalStretch(0);
-        sizePolicy3.setHeightForWidth(label_5->sizePolicy().hasHeightForWidth());
-        label_5->setSizePolicy(sizePolicy3);
-        label_5->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        verticalLayout_5->addWidget(label_5);
-
-        voltage_lcdNumber = new QLCDNumber(tab_4);
-        voltage_lcdNumber->setObjectName("voltage_lcdNumber");
-        QSizePolicy sizePolicy4(QSizePolicy::Policy::Maximum, QSizePolicy::Policy::Minimum);
-        sizePolicy4.setHorizontalStretch(0);
-        sizePolicy4.setVerticalStretch(0);
-        sizePolicy4.setHeightForWidth(voltage_lcdNumber->sizePolicy().hasHeightForWidth());
-        voltage_lcdNumber->setSizePolicy(sizePolicy4);
-        voltage_lcdNumber->setMinimumSize(QSize(200, 0));
-
-        verticalLayout_5->addWidget(voltage_lcdNumber);
-
-
-        gridLayout_3->addLayout(verticalLayout_5, 0, 1, 1, 1);
-
-        verticalLayout_6 = new QVBoxLayout();
-        verticalLayout_6->setObjectName("verticalLayout_6");
-        horizontalLayout_4 = new QHBoxLayout();
-        horizontalLayout_4->setObjectName("horizontalLayout_4");
-        label_3 = new QLabel(tab_4);
-        label_3->setObjectName("label_3");
-        sizePolicy3.setHeightForWidth(label_3->sizePolicy().hasHeightForWidth());
-        label_3->setSizePolicy(sizePolicy3);
-        label_3->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_4->addWidget(label_3);
-
-        swtValue_label = new QLabel(tab_4);
-        swtValue_label->setObjectName("swtValue_label");
-        sizePolicy3.setHeightForWidth(swtValue_label->sizePolicy().hasHeightForWidth());
-        swtValue_label->setSizePolicy(sizePolicy3);
-
-        horizontalLayout_4->addWidget(swtValue_label);
-
-
-        verticalLayout_6->addLayout(horizontalLayout_4);
-
-        gridLayout_2 = new QGridLayout();
-        gridLayout_2->setObjectName("gridLayout_2");
-        label_24 = new QLabel(tab_4);
-        label_24->setObjectName("label_24");
-        label_24->setStyleSheet(QString::fromUtf8("QLabel#label_24{\n"
-"	color:#ff1418\n"
-"}"));
-        label_24->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_24, 0, 10, 1, 1);
-
-        label_14 = new QLabel(tab_4);
-        label_14->setObjectName("label_14");
-
-        gridLayout_2->addWidget(label_14, 0, 0, 1, 1);
-
-        label_23 = new QLabel(tab_4);
-        label_23->setObjectName("label_23");
-        label_23->setStyleSheet(QString::fromUtf8("QLabel#label_23{\n"
-"	color:#ff1418\n"
-"}"));
-        label_23->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_23, 0, 9, 1, 1);
-
-        label_21 = new QLabel(tab_4);
-        label_21->setObjectName("label_21");
-        label_21->setStyleSheet(QString::fromUtf8("QLabel#label_21{\n"
-"	color:#ff1418\n"
-"}"));
-        label_21->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_21, 0, 7, 1, 1);
-
-        label_16 = new QLabel(tab_4);
-        label_16->setObjectName("label_16");
-
-        gridLayout_2->addWidget(label_16, 0, 2, 1, 1);
-
-        label_15 = new QLabel(tab_4);
-        label_15->setObjectName("label_15");
-
-        gridLayout_2->addWidget(label_15, 0, 1, 1, 1);
-
-        label_17 = new QLabel(tab_4);
-        label_17->setObjectName("label_17");
-        label_17->setStyleSheet(QString::fromUtf8("QLabel#label_17{\n"
-"	color:#ff1418\n"
-"}"));
-        label_17->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_17, 0, 3, 1, 1);
-
-        label_18 = new QLabel(tab_4);
-        label_18->setObjectName("label_18");
-        label_18->setStyleSheet(QString::fromUtf8("QLabel#label_18{\n"
-"	color:#ff1418\n"
-"}"));
-        label_18->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_18, 0, 4, 1, 1);
-
-        label_25 = new QLabel(tab_4);
-        label_25->setObjectName("label_25");
-        label_25->setStyleSheet(QString::fromUtf8("QLabel#label_25{\n"
-"	color:#ff1418\n"
-"}"));
-        label_25->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_25, 0, 11, 1, 1);
-
-        label_26 = new QLabel(tab_4);
-        label_26->setObjectName("label_26");
-        label_26->setStyleSheet(QString::fromUtf8("QLabel#label_26{\n"
-"	color:#ff1418\n"
-"}"));
-        label_26->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_26, 0, 12, 1, 1);
-
-        label_19 = new QLabel(tab_4);
-        label_19->setObjectName("label_19");
-        label_19->setStyleSheet(QString::fromUtf8("QLabel#label_19{\n"
-"	color:#ff1418\n"
-"}"));
-        label_19->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_19, 0, 5, 1, 1);
-
-        label_22 = new QLabel(tab_4);
-        label_22->setObjectName("label_22");
-        label_22->setStyleSheet(QString::fromUtf8("QLabel#label_22{\n"
-"	color:#ff1418\n"
-"}"));
-        label_22->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_22, 0, 8, 1, 1);
-
-        label_20 = new QLabel(tab_4);
-        label_20->setObjectName("label_20");
-        label_20->setStyleSheet(QString::fromUtf8("QLabel#label_20{\n"
-"	color:#ff1418\n"
-"}"));
-        label_20->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        gridLayout_2->addWidget(label_20, 0, 6, 1, 1);
-
-        label_27 = new QLabel(tab_4);
-        label_27->setObjectName("label_27");
-        label_27->setStyleSheet(QString::fromUtf8("QLabel#label_27{\n"
-"	color:#ff1418\n"
-"}"));
-        label_27->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        gridLayout_2->addWidget(label_27, 0, 13, 1, 1);
-
-
-        verticalLayout_6->addLayout(gridLayout_2);
-
-        swr_horizontalSlider = new QSlider(tab_4);
-        swr_horizontalSlider->setObjectName("swr_horizontalSlider");
-        swr_horizontalSlider->setMinimum(10);
-        swr_horizontalSlider->setMaximum(140);
-        swr_horizontalSlider->setOrientation(Qt::Orientation::Horizontal);
-        swr_horizontalSlider->setTickPosition(QSlider::TickPosition::TicksAbove);
-
-        verticalLayout_6->addWidget(swr_horizontalSlider);
-
-        horizontalLayout_16 = new QHBoxLayout();
-        horizontalLayout_16->setObjectName("horizontalLayout_16");
-        swtValue_dial = new QDial(tab_4);
-        swtValue_dial->setObjectName("swtValue_dial");
-        sizePolicy1.setHeightForWidth(swtValue_dial->sizePolicy().hasHeightForWidth());
-        swtValue_dial->setSizePolicy(sizePolicy1);
-        swtValue_dial->setMinimum(10);
-        swtValue_dial->setMaximum(140);
-        swtValue_dial->setSliderPosition(10);
-        swtValue_dial->setWrapping(false);
-        swtValue_dial->setNotchTarget(10.000000000000000);
-        swtValue_dial->setNotchesVisible(true);
-
-        horizontalLayout_16->addWidget(swtValue_dial);
-
-
-        verticalLayout_6->addLayout(horizontalLayout_16);
-
-        horizontalLayout_14 = new QHBoxLayout();
-        horizontalLayout_14->setObjectName("horizontalLayout_14");
-        swtValue_doubleSpinBox = new QDoubleSpinBox(tab_4);
-        swtValue_doubleSpinBox->setObjectName("swtValue_doubleSpinBox");
-        sizePolicy3.setHeightForWidth(swtValue_doubleSpinBox->sizePolicy().hasHeightForWidth());
-        swtValue_doubleSpinBox->setSizePolicy(sizePolicy3);
-        swtValue_doubleSpinBox->setMaximumSize(QSize(100, 16777215));
-        swtValue_doubleSpinBox->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        swtValue_doubleSpinBox->setReadOnly(false);
-        swtValue_doubleSpinBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::PlusMinus);
-        swtValue_doubleSpinBox->setDecimals(1);
-        swtValue_doubleSpinBox->setMinimum(1.000000000000000);
-        swtValue_doubleSpinBox->setMaximum(14.000000000000000);
-        swtValue_doubleSpinBox->setSingleStep(0.100000000000000);
-
-        horizontalLayout_14->addWidget(swtValue_doubleSpinBox);
-
-
-        verticalLayout_6->addLayout(horizontalLayout_14);
-
-
-        gridLayout_3->addLayout(verticalLayout_6, 1, 0, 1, 2);
-
-        horizontalLayout_15 = new QHBoxLayout();
-        horizontalLayout_15->setObjectName("horizontalLayout_15");
-        SWT_pushButton = new QPushButton(tab_4);
-        SWT_pushButton->setObjectName("SWT_pushButton");
-        QSizePolicy sizePolicy5(QSizePolicy::Policy::Maximum, QSizePolicy::Policy::Maximum);
-        sizePolicy5.setHorizontalStretch(0);
-        sizePolicy5.setVerticalStretch(0);
-        sizePolicy5.setHeightForWidth(SWT_pushButton->sizePolicy().hasHeightForWidth());
-        SWT_pushButton->setSizePolicy(sizePolicy5);
-        SWT_pushButton->setMinimumSize(QSize(50, 50));
-
-        horizontalLayout_15->addWidget(SWT_pushButton);
-
-
-        gridLayout_3->addLayout(horizontalLayout_15, 2, 0, 1, 2);
-
-        line_6 = new QFrame(tab_4);
-        line_6->setObjectName("line_6");
-        line_6->setFrameShape(QFrame::Shape::HLine);
-        line_6->setFrameShadow(QFrame::Shadow::Sunken);
-
-        gridLayout_3->addWidget(line_6, 3, 0, 1, 2);
-
-        verticalLayout_7 = new QVBoxLayout();
-        verticalLayout_7->setObjectName("verticalLayout_7");
-        horizontalLayout_5 = new QHBoxLayout();
-        horizontalLayout_5->setObjectName("horizontalLayout_5");
-        label_6 = new QLabel(tab_4);
-        label_6->setObjectName("label_6");
-        sizePolicy.setHeightForWidth(label_6->sizePolicy().hasHeightForWidth());
-        label_6->setSizePolicy(sizePolicy);
-        label_6->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_5->addWidget(label_6);
-
-        PPc_label = new QLabel(tab_4);
-        PPc_label->setObjectName("PPc_label");
-        sizePolicy.setHeightForWidth(PPc_label->sizePolicy().hasHeightForWidth());
-        PPc_label->setSizePolicy(sizePolicy);
-        PPc_label->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_5->addWidget(PPc_label);
-
-
-        verticalLayout_7->addLayout(horizontalLayout_5);
-
-        horizontalLayout_12 = new QHBoxLayout();
-        horizontalLayout_12->setObjectName("horizontalLayout_12");
-        label_28 = new QLabel(tab_4);
-        label_28->setObjectName("label_28");
-
-        horizontalLayout_12->addWidget(label_28);
-
-        PPc_horizontalSlider = new QSlider(tab_4);
-        PPc_horizontalSlider->setObjectName("PPc_horizontalSlider");
-        QSizePolicy sizePolicy6(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
-        sizePolicy6.setHorizontalStretch(0);
-        sizePolicy6.setVerticalStretch(0);
-        sizePolicy6.setHeightForWidth(PPc_horizontalSlider->sizePolicy().hasHeightForWidth());
-        PPc_horizontalSlider->setSizePolicy(sizePolicy6);
-        PPc_horizontalSlider->setMinimum(-100);
-        PPc_horizontalSlider->setMaximum(100);
-        PPc_horizontalSlider->setOrientation(Qt::Orientation::Horizontal);
-        PPc_horizontalSlider->setTickPosition(QSlider::TickPosition::TicksAbove);
-
-        horizontalLayout_12->addWidget(PPc_horizontalSlider);
-
-        PPcv_spinBox = new QSpinBox(tab_4);
-        PPcv_spinBox->setObjectName("PPcv_spinBox");
-        QSizePolicy sizePolicy7(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Minimum);
-        sizePolicy7.setHorizontalStretch(0);
-        sizePolicy7.setVerticalStretch(0);
-        sizePolicy7.setHeightForWidth(PPcv_spinBox->sizePolicy().hasHeightForWidth());
-        PPcv_spinBox->setSizePolicy(sizePolicy7);
-        PPcv_spinBox->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        PPcv_spinBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::PlusMinus);
-        PPcv_spinBox->setMinimum(-100);
-        PPcv_spinBox->setMaximum(100);
-
-        horizontalLayout_12->addWidget(PPcv_spinBox);
-
-
-        verticalLayout_7->addLayout(horizontalLayout_12);
-
-
-        gridLayout_3->addLayout(verticalLayout_7, 4, 0, 1, 2);
-
-        verticalLayout_8 = new QVBoxLayout();
-        verticalLayout_8->setObjectName("verticalLayout_8");
-        horizontalLayout_8 = new QHBoxLayout();
-        horizontalLayout_8->setObjectName("horizontalLayout_8");
-        label_11 = new QLabel(tab_4);
-        label_11->setObjectName("label_11");
-        sizePolicy.setHeightForWidth(label_11->sizePolicy().hasHeightForWidth());
-        label_11->setSizePolicy(sizePolicy);
-        label_11->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_8->addWidget(label_11);
-
-        Swc_label = new QLabel(tab_4);
-        Swc_label->setObjectName("Swc_label");
-        sizePolicy.setHeightForWidth(Swc_label->sizePolicy().hasHeightForWidth());
-        Swc_label->setSizePolicy(sizePolicy);
-        Swc_label->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_8->addWidget(Swc_label);
-
-
-        verticalLayout_8->addLayout(horizontalLayout_8);
-
-        horizontalLayout_11 = new QHBoxLayout();
-        horizontalLayout_11->setObjectName("horizontalLayout_11");
-        label_29 = new QLabel(tab_4);
-        label_29->setObjectName("label_29");
-
-        horizontalLayout_11->addWidget(label_29);
-
-        Swc_horizontalSlider = new QSlider(tab_4);
-        Swc_horizontalSlider->setObjectName("Swc_horizontalSlider");
-        sizePolicy6.setHeightForWidth(Swc_horizontalSlider->sizePolicy().hasHeightForWidth());
-        Swc_horizontalSlider->setSizePolicy(sizePolicy6);
-        Swc_horizontalSlider->setMinimum(-100);
-        Swc_horizontalSlider->setMaximum(100);
-        Swc_horizontalSlider->setOrientation(Qt::Orientation::Horizontal);
-        Swc_horizontalSlider->setTickPosition(QSlider::TickPosition::TicksAbove);
-
-        horizontalLayout_11->addWidget(Swc_horizontalSlider);
-
-        Swcv_spinBox = new QSpinBox(tab_4);
-        Swcv_spinBox->setObjectName("Swcv_spinBox");
-        sizePolicy7.setHeightForWidth(Swcv_spinBox->sizePolicy().hasHeightForWidth());
-        Swcv_spinBox->setSizePolicy(sizePolicy7);
-        Swcv_spinBox->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        Swcv_spinBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::PlusMinus);
-        Swcv_spinBox->setMinimum(-100);
-        Swcv_spinBox->setMaximum(100);
-
-        horizontalLayout_11->addWidget(Swcv_spinBox);
-
-
-        verticalLayout_8->addLayout(horizontalLayout_11);
-
-
-        gridLayout_3->addLayout(verticalLayout_8, 5, 0, 1, 2);
-
-        verticalLayout_9 = new QVBoxLayout();
-        verticalLayout_9->setObjectName("verticalLayout_9");
-        horizontalLayout_9 = new QHBoxLayout();
-        horizontalLayout_9->setObjectName("horizontalLayout_9");
-        label_12 = new QLabel(tab_4);
-        label_12->setObjectName("label_12");
-        sizePolicy.setHeightForWidth(label_12->sizePolicy().hasHeightForWidth());
-        label_12->setSizePolicy(sizePolicy);
-        label_12->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_9->addWidget(label_12);
-
-        Vc_label = new QLabel(tab_4);
-        Vc_label->setObjectName("Vc_label");
-        sizePolicy.setHeightForWidth(Vc_label->sizePolicy().hasHeightForWidth());
-        Vc_label->setSizePolicy(sizePolicy);
-        Vc_label->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
-
-        horizontalLayout_9->addWidget(Vc_label);
-
-
-        verticalLayout_9->addLayout(horizontalLayout_9);
-
-        horizontalLayout_13 = new QHBoxLayout();
-        horizontalLayout_13->setObjectName("horizontalLayout_13");
-        label_30 = new QLabel(tab_4);
-        label_30->setObjectName("label_30");
-
-        horizontalLayout_13->addWidget(label_30);
-
-        Vc_horizontalSlider = new QSlider(tab_4);
-        Vc_horizontalSlider->setObjectName("Vc_horizontalSlider");
-        sizePolicy6.setHeightForWidth(Vc_horizontalSlider->sizePolicy().hasHeightForWidth());
-        Vc_horizontalSlider->setSizePolicy(sizePolicy6);
-        Vc_horizontalSlider->setMinimum(-100);
-        Vc_horizontalSlider->setMaximum(100);
-        Vc_horizontalSlider->setOrientation(Qt::Orientation::Horizontal);
-        Vc_horizontalSlider->setTickPosition(QSlider::TickPosition::TicksAbove);
-
-        horizontalLayout_13->addWidget(Vc_horizontalSlider);
-
-        Vcv_spinBox = new QSpinBox(tab_4);
-        Vcv_spinBox->setObjectName("Vcv_spinBox");
-        sizePolicy7.setHeightForWidth(Vcv_spinBox->sizePolicy().hasHeightForWidth());
-        Vcv_spinBox->setSizePolicy(sizePolicy7);
-        Vcv_spinBox->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        Vcv_spinBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::PlusMinus);
-        Vcv_spinBox->setMinimum(-100);
-        Vcv_spinBox->setMaximum(100);
-
-        horizontalLayout_13->addWidget(Vcv_spinBox);
-
-
-        verticalLayout_9->addLayout(horizontalLayout_13);
-
-
-        gridLayout_3->addLayout(verticalLayout_9, 6, 0, 1, 2);
-
-        horizontalLayout_17 = new QHBoxLayout();
-        horizontalLayout_17->setObjectName("horizontalLayout_17");
-        ATC_pushButton = new QPushButton(tab_4);
-        ATC_pushButton->setObjectName("ATC_pushButton");
-        sizePolicy5.setHeightForWidth(ATC_pushButton->sizePolicy().hasHeightForWidth());
-        ATC_pushButton->setSizePolicy(sizePolicy5);
-        ATC_pushButton->setMinimumSize(QSize(50, 50));
-
-        horizontalLayout_17->addWidget(ATC_pushButton);
-
-
-        gridLayout_3->addLayout(horizontalLayout_17, 7, 0, 1, 2);
-
-        tabWidget->addTab(tab_4, QString());
-
-        horizontalLayout->addWidget(tabWidget);
-
-        line_4 = new QFrame(termial);
-        line_4->setObjectName("line_4");
-        line_4->setFrameShape(QFrame::Shape::VLine);
-        line_4->setFrameShadow(QFrame::Shadow::Sunken);
-
-        horizontalLayout->addWidget(line_4);
-
-        control = new QWidget(termial);
-        control->setObjectName("control");
-        QSizePolicy sizePolicy8(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Preferred);
-        sizePolicy8.setHorizontalStretch(0);
-        sizePolicy8.setVerticalStretch(0);
-        sizePolicy8.setHeightForWidth(control->sizePolicy().hasHeightForWidth());
-        control->setSizePolicy(sizePolicy8);
-        control->setMaximumSize(QSize(16777215, 16777215));
-        verticalLayout_3 = new QVBoxLayout(control);
-        verticalLayout_3->setObjectName("verticalLayout_3");
-        label = new QLabel(control);
-        label->setObjectName("label");
-        QSizePolicy sizePolicy9(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Fixed);
-        sizePolicy9.setHorizontalStretch(0);
-        sizePolicy9.setVerticalStretch(0);
-        sizePolicy9.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy9);
-        label->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        verticalLayout_3->addWidget(label);
-
-        language_comboBox = new QComboBox(control);
-        language_comboBox->setObjectName("language_comboBox");
-        QSizePolicy sizePolicy10(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Preferred);
-        sizePolicy10.setHorizontalStretch(0);
-        sizePolicy10.setVerticalStretch(0);
-        sizePolicy10.setHeightForWidth(language_comboBox->sizePolicy().hasHeightForWidth());
-        language_comboBox->setSizePolicy(sizePolicy10);
-        language_comboBox->setMinimumSize(QSize(150, 0));
-
-        verticalLayout_3->addWidget(language_comboBox);
-
-        line_2 = new QFrame(control);
-        line_2->setObjectName("line_2");
-        line_2->setFrameShape(QFrame::Shape::HLine);
-        line_2->setFrameShadow(QFrame::Shadow::Sunken);
-
-        verticalLayout_3->addWidget(line_2);
-
-        label_2 = new QLabel(control);
-        label_2->setObjectName("label_2");
-        sizePolicy9.setHeightForWidth(label_2->sizePolicy().hasHeightForWidth());
-        label_2->setSizePolicy(sizePolicy9);
-        label_2->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        verticalLayout_3->addWidget(label_2);
-
-        horizontalLayout_3 = new QHBoxLayout();
-        horizontalLayout_3->setObjectName("horizontalLayout_3");
-        save_pushButton = new QPushButton(control);
-        save_pushButton->setObjectName("save_pushButton");
-        sizePolicy10.setHeightForWidth(save_pushButton->sizePolicy().hasHeightForWidth());
-        save_pushButton->setSizePolicy(sizePolicy10);
-        QIcon icon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave));
-        save_pushButton->setIcon(icon);
-
-        horizontalLayout_3->addWidget(save_pushButton);
-
-        open_pushButton = new QPushButton(control);
-        open_pushButton->setObjectName("open_pushButton");
-        sizePolicy10.setHeightForWidth(open_pushButton->sizePolicy().hasHeightForWidth());
-        open_pushButton->setSizePolicy(sizePolicy10);
-        QIcon icon1(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSaveAs));
-        open_pushButton->setIcon(icon1);
-
-        horizontalLayout_3->addWidget(open_pushButton);
-
-
-        verticalLayout_3->addLayout(horizontalLayout_3);
-
-        line = new QFrame(control);
-        line->setObjectName("line");
-        line->setFrameShape(QFrame::Shape::HLine);
-        line->setFrameShadow(QFrame::Shadow::Sunken);
-
-        verticalLayout_3->addWidget(line);
-
-        label_4 = new QLabel(control);
-        label_4->setObjectName("label_4");
-        sizePolicy9.setHeightForWidth(label_4->sizePolicy().hasHeightForWidth());
-        label_4->setSizePolicy(sizePolicy9);
-        label_4->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        verticalLayout_3->addWidget(label_4);
-
-        label_7 = new QLabel(control);
-        label_7->setObjectName("label_7");
-        sizePolicy9.setHeightForWidth(label_7->sizePolicy().hasHeightForWidth());
-        label_7->setSizePolicy(sizePolicy9);
-
-        verticalLayout_3->addWidget(label_7);
-
-        IPLocal_lineEdit = new QLineEdit(control);
-        IPLocal_lineEdit->setObjectName("IPLocal_lineEdit");
-        sizePolicy10.setHeightForWidth(IPLocal_lineEdit->sizePolicy().hasHeightForWidth());
-        IPLocal_lineEdit->setSizePolicy(sizePolicy10);
-#if QT_CONFIG(tooltip)
-        IPLocal_lineEdit->setToolTip(QString::fromUtf8(""));
-#endif // QT_CONFIG(tooltip)
-
-        verticalLayout_3->addWidget(IPLocal_lineEdit);
-
-        label_8 = new QLabel(control);
-        label_8->setObjectName("label_8");
-        sizePolicy9.setHeightForWidth(label_8->sizePolicy().hasHeightForWidth());
-        label_8->setSizePolicy(sizePolicy9);
-
-        verticalLayout_3->addWidget(label_8);
-
-        tcpPort_lineEdit = new QLineEdit(control);
-        tcpPort_lineEdit->setObjectName("tcpPort_lineEdit");
-        sizePolicy10.setHeightForWidth(tcpPort_lineEdit->sizePolicy().hasHeightForWidth());
-        tcpPort_lineEdit->setSizePolicy(sizePolicy10);
-#if QT_CONFIG(tooltip)
-        tcpPort_lineEdit->setToolTip(QString::fromUtf8(""));
-#endif // QT_CONFIG(tooltip)
-
-        verticalLayout_3->addWidget(tcpPort_lineEdit);
-
-        tcpOpen_pushButton = new QPushButton(control);
-        tcpOpen_pushButton->setObjectName("tcpOpen_pushButton");
-        sizePolicy10.setHeightForWidth(tcpOpen_pushButton->sizePolicy().hasHeightForWidth());
-        tcpOpen_pushButton->setSizePolicy(sizePolicy10);
-
-        verticalLayout_3->addWidget(tcpOpen_pushButton);
-
-        label_9 = new QLabel(control);
-        label_9->setObjectName("label_9");
-        QSizePolicy sizePolicy11(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Fixed);
-        sizePolicy11.setHorizontalStretch(0);
-        sizePolicy11.setVerticalStretch(0);
-        sizePolicy11.setHeightForWidth(label_9->sizePolicy().hasHeightForWidth());
-        label_9->setSizePolicy(sizePolicy11);
-
-        verticalLayout_3->addWidget(label_9);
-
-        connectedDevices_comboBox = new QComboBox(control);
-        connectedDevices_comboBox->setObjectName("connectedDevices_comboBox");
-        sizePolicy.setHeightForWidth(connectedDevices_comboBox->sizePolicy().hasHeightForWidth());
-        connectedDevices_comboBox->setSizePolicy(sizePolicy);
-#if QT_CONFIG(tooltip)
-        connectedDevices_comboBox->setToolTip(QString::fromUtf8(""));
-#endif // QT_CONFIG(tooltip)
-
-        verticalLayout_3->addWidget(connectedDevices_comboBox);
-
-        line_3 = new QFrame(control);
-        line_3->setObjectName("line_3");
-        line_3->setFrameShape(QFrame::Shape::HLine);
-        line_3->setFrameShadow(QFrame::Shadow::Sunken);
-
-        verticalLayout_3->addWidget(line_3);
-
-        label_10 = new QLabel(control);
-        label_10->setObjectName("label_10");
-        sizePolicy11.setHeightForWidth(label_10->sizePolicy().hasHeightForWidth());
-        label_10->setSizePolicy(sizePolicy11);
-        label_10->setAlignment(Qt::AlignmentFlag::AlignCenter);
-
-        verticalLayout_3->addWidget(label_10);
-
-        horizontalLayout_7 = new QHBoxLayout();
-        horizontalLayout_7->setObjectName("horizontalLayout_7");
-        serialport_comboBox = new QComboBox(control);
-        serialport_comboBox->setObjectName("serialport_comboBox");
-        serialport_comboBox->setEnabled(true);
-        sizePolicy.setHeightForWidth(serialport_comboBox->sizePolicy().hasHeightForWidth());
-        serialport_comboBox->setSizePolicy(sizePolicy);
-        serialport_comboBox->setMinimumSize(QSize(0, 0));
-        serialport_comboBox->setMaximumSize(QSize(16777215, 16777215));
-        serialport_comboBox->setSizeIncrement(QSize(210, 0));
-#if QT_CONFIG(tooltip)
-        serialport_comboBox->setToolTip(QString::fromUtf8(""));
-#endif // QT_CONFIG(tooltip)
-
-        horizontalLayout_7->addWidget(serialport_comboBox);
-
-        serialportFlash_pushButton = new QPushButton(control);
-        serialportFlash_pushButton->setObjectName("serialportFlash_pushButton");
-        sizePolicy8.setHeightForWidth(serialportFlash_pushButton->sizePolicy().hasHeightForWidth());
-        serialportFlash_pushButton->setSizePolicy(sizePolicy8);
-        QIcon icon2(QIcon::fromTheme(QIcon::ThemeIcon::SyncSynchronizing));
-        serialportFlash_pushButton->setIcon(icon2);
-
-        horizontalLayout_7->addWidget(serialportFlash_pushButton);
-
-
-        verticalLayout_3->addLayout(horizontalLayout_7);
-
-        serialportLink_pushButton = new QPushButton(control);
-        serialportLink_pushButton->setObjectName("serialportLink_pushButton");
-        sizePolicy10.setHeightForWidth(serialportLink_pushButton->sizePolicy().hasHeightForWidth());
-        serialportLink_pushButton->setSizePolicy(sizePolicy10);
-
-        verticalLayout_3->addWidget(serialportLink_pushButton);
-
-        line_5 = new QFrame(control);
-        line_5->setObjectName("line_5");
-        line_5->setFrameShape(QFrame::Shape::HLine);
-        line_5->setFrameShadow(QFrame::Shadow::Sunken);
-
-        verticalLayout_3->addWidget(line_5);
-
-        horizontalLayout_6 = new QHBoxLayout();
-        horizontalLayout_6->setObjectName("horizontalLayout_6");
-        send_btn = new QPushButton(control);
-        send_btn->setObjectName("send_btn");
-        sizePolicy.setHeightForWidth(send_btn->sizePolicy().hasHeightForWidth());
-        send_btn->setSizePolicy(sizePolicy);
-        QIcon icon3(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSend));
-        send_btn->setIcon(icon3);
-
-        horizontalLayout_6->addWidget(send_btn);
-
-        read_btn = new QPushButton(control);
-        read_btn->setObjectName("read_btn");
-        sizePolicy.setHeightForWidth(read_btn->sizePolicy().hasHeightForWidth());
-        read_btn->setSizePolicy(sizePolicy);
-        QIcon icon4(QIcon::fromTheme(QIcon::ThemeIcon::EditFind));
-        read_btn->setIcon(icon4);
-
-        horizontalLayout_6->addWidget(read_btn);
-
-
-        verticalLayout_3->addLayout(horizontalLayout_6);
-
-
-        horizontalLayout->addWidget(control);
-
-
-        gridLayout->addLayout(horizontalLayout, 0, 0, 1, 1);
+        gridLayout->addWidget(tabWidget, 1, 0, 1, 1);
 
 
         retranslateUi(termial);
 
-        tabWidget->setCurrentIndex(4);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(termial);
@@ -975,64 +831,57 @@ public:
 
     void retranslateUi(QWidget *termial)
     {
-        termial->setWindowTitle(QCoreApplication::translate("termial", "\345\233\275\350\265\253T7", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_5), QCoreApplication::translate("termial", "\351\246\226\351\241\265", nullptr));
-        checkAll_pushButton->setText(QCoreApplication::translate("termial", "\345\205\250\351\200\211", nullptr));
-        checkNotAll_pushButton->setText(QCoreApplication::translate("termial", "\345\205\250\344\270\215\351\200\211", nullptr));
-        channelNum_lineEdit->setPlaceholderText(QCoreApplication::translate("termial", "\350\267\263\350\275\254Channel", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("termial", "\347\274\226\347\250\213", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("termial", "\350\256\276\347\275\256", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_3), QCoreApplication::translate("termial", "\345\267\245\347\250\213\346\250\241\345\274\217", nullptr));
-        label_13->setText(QCoreApplication::translate("termial", "\345\275\223\345\211\215\346\250\241\345\274\217:", nullptr));
-        tunerCurrentModel_label->setText(QCoreApplication::translate("termial", "\350\207\252\345\212\250\350\260\203\350\260\220", nullptr));
-        auto_radioButton->setText(QCoreApplication::translate("termial", "\350\207\252\345\212\250\350\260\203\350\260\220", nullptr));
-        start_radioButton->setText(QCoreApplication::translate("termial", "\346\211\213\345\212\250\350\260\203\350\260\220", nullptr));
-        close_radioButton->setText(QCoreApplication::translate("termial", "\345\205\263\351\227\255\350\260\203\350\260\220", nullptr));
-        label_5->setText(QCoreApplication::translate("termial", "\347\224\265\345\216\213(\345\215\225\344\275\215:v)", nullptr));
-        label_3->setText(QCoreApplication::translate("termial", "\351\251\273\346\263\242\350\260\203\350\260\220\345\200\274", nullptr));
-        swtValue_label->setText(QCoreApplication::translate("termial", "0", nullptr));
-        label_24->setText(QCoreApplication::translate("termial", "  11", nullptr));
-        label_14->setText(QCoreApplication::translate("termial", "1.0", nullptr));
-        label_23->setText(QCoreApplication::translate("termial", " 10", nullptr));
-        label_21->setText(QCoreApplication::translate("termial", "8", nullptr));
-        label_16->setText(QCoreApplication::translate("termial", " 3.0", nullptr));
-        label_15->setText(QCoreApplication::translate("termial", "2.0", nullptr));
-        label_17->setText(QCoreApplication::translate("termial", "4", nullptr));
-        label_18->setText(QCoreApplication::translate("termial", "5", nullptr));
-        label_25->setText(QCoreApplication::translate("termial", "  12", nullptr));
-        label_26->setText(QCoreApplication::translate("termial", "  13", nullptr));
-        label_19->setText(QCoreApplication::translate("termial", "6", nullptr));
-        label_22->setText(QCoreApplication::translate("termial", "9", nullptr));
-        label_20->setText(QCoreApplication::translate("termial", "7", nullptr));
-        label_27->setText(QCoreApplication::translate("termial", "14", nullptr));
-        SWT_pushButton->setText(QCoreApplication::translate("termial", "\351\251\273\346\263\242\350\260\203\350\260\220", nullptr));
-        label_6->setText(QCoreApplication::translate("termial", "\346\255\243\345\220\221\345\212\237\347\216\207\346\240\241\345\207\206\345\200\274", nullptr));
-        PPc_label->setText(QCoreApplication::translate("termial", "0", nullptr));
-        label_28->setText(QCoreApplication::translate("termial", "\346\233\264\346\224\271:", nullptr));
-        label_11->setText(QCoreApplication::translate("termial", "\351\251\273\346\263\242\346\240\241\345\207\206\345\200\274", nullptr));
-        Swc_label->setText(QCoreApplication::translate("termial", "0", nullptr));
-        label_29->setText(QCoreApplication::translate("termial", "\346\233\264\346\224\271:", nullptr));
-        label_12->setText(QCoreApplication::translate("termial", "\347\224\265\345\216\213\346\240\241\345\207\206\345\200\274", nullptr));
-        Vc_label->setText(QCoreApplication::translate("termial", "0", nullptr));
-        label_30->setText(QCoreApplication::translate("termial", "\346\233\264\346\224\271:", nullptr));
-        ATC_pushButton->setText(QCoreApplication::translate("termial", "\345\244\251\350\260\203\346\240\241\345\207\206", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_4), QCoreApplication::translate("termial", "\345\244\251\350\260\203", nullptr));
-        label->setText(QCoreApplication::translate("termial", "\350\257\255\350\250\200", nullptr));
-        label_2->setText(QCoreApplication::translate("termial", "\346\226\207\344\273\266", nullptr));
-        save_pushButton->setText(QCoreApplication::translate("termial", "\344\277\235\345\255\230", nullptr));
-        open_pushButton->setText(QCoreApplication::translate("termial", "\346\211\223\345\274\200", nullptr));
-        label_4->setText(QCoreApplication::translate("termial", "\347\275\221\347\273\234\350\277\236\346\216\245", nullptr));
-        label_7->setText(QCoreApplication::translate("termial", "\346\234\254\346\234\272\345\234\260\345\235\200", nullptr));
-        IPLocal_lineEdit->setText(QCoreApplication::translate("termial", "192.168.1.68", nullptr));
-        label_8->setText(QCoreApplication::translate("termial", "TCP\347\253\257\345\217\243", nullptr));
-        tcpPort_lineEdit->setText(QCoreApplication::translate("termial", "20108", nullptr));
-        tcpOpen_pushButton->setText(QCoreApplication::translate("termial", "\345\274\200\345\220\257\346\234\215\345\212\241\345\231\250", nullptr));
-        label_9->setText(QCoreApplication::translate("termial", "\345\267\262\350\277\236\346\216\245\350\256\276\345\244\207", nullptr));
-        label_10->setText(QCoreApplication::translate("termial", "\344\270\262\345\217\243\350\277\236\346\216\245", nullptr));
+        termial->setWindowTitle(QCoreApplication::translate("termial", "\346\216\247\345\210\266\347\273\210\347\253\257", nullptr));
+#if QT_CONFIG(tooltip)
+        serialport_comboBox->setToolTip(QCoreApplication::translate("termial", "\350\257\267\351\200\211\346\213\251\345\257\271\345\272\224\344\270\262\345\217\243", nullptr));
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        serialportFlash_pushButton->setToolTip(QCoreApplication::translate("termial", "\345\210\267\346\226\260\344\270\262\345\217\243\345\210\227\350\241\250", nullptr));
+#endif // QT_CONFIG(tooltip)
         serialportFlash_pushButton->setText(QString());
+#if QT_CONFIG(tooltip)
+        serialportLink_pushButton->setToolTip(QCoreApplication::translate("termial", "\350\277\236\346\216\245\344\270\262\345\217\243", nullptr));
+#endif // QT_CONFIG(tooltip)
         serialportLink_pushButton->setText(QCoreApplication::translate("termial", "\350\277\236\346\216\245", nullptr));
-        send_btn->setText(QCoreApplication::translate("termial", "\345\217\221\351\200\201", nullptr));
+#if QT_CONFIG(tooltip)
+        language_comboBox->setToolTip(QCoreApplication::translate("termial", "\351\200\211\346\213\251\350\257\255\350\250\200", nullptr));
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        checkAll_pushButton->setToolTip(QCoreApplication::translate("termial", "\345\205\250\351\200\211", nullptr));
+#endif // QT_CONFIG(tooltip)
+        checkAll_pushButton->setText(QCoreApplication::translate("termial", "\345\205\250\351\200\211", nullptr));
+#if QT_CONFIG(tooltip)
+        checkNotAll_pushButton->setToolTip(QCoreApplication::translate("termial", "\345\217\226\346\266\210\345\205\250\351\200\211", nullptr));
+#endif // QT_CONFIG(tooltip)
+        checkNotAll_pushButton->setText(QCoreApplication::translate("termial", "\345\205\250\344\270\215\351\200\211", nullptr));
+#if QT_CONFIG(tooltip)
+        read_btn->setToolTip(QCoreApplication::translate("termial", "\350\257\273\345\217\226\344\270\262\345\217\243\346\225\260\346\215\256", nullptr));
+#endif // QT_CONFIG(tooltip)
         read_btn->setText(QCoreApplication::translate("termial", "\350\257\273\345\217\226", nullptr));
+#if QT_CONFIG(tooltip)
+        send_btn->setToolTip(QCoreApplication::translate("termial", "\345\217\221\351\200\201\344\270\262\345\217\243\346\225\260\346\215\256", nullptr));
+#endif // QT_CONFIG(tooltip)
+        send_btn->setText(QCoreApplication::translate("termial", "\345\217\221\351\200\201", nullptr));
+#if QT_CONFIG(tooltip)
+        save_pushButton->setToolTip(QCoreApplication::translate("termial", "\344\277\235\345\255\230\344\277\241\351\201\223\346\226\207\344\273\266", nullptr));
+#endif // QT_CONFIG(tooltip)
+        save_pushButton->setText(QCoreApplication::translate("termial", "\344\277\235\345\255\230", nullptr));
+#if QT_CONFIG(tooltip)
+        open_pushButton->setToolTip(QCoreApplication::translate("termial", "\345\206\231\345\205\245\344\277\241\351\201\223\346\226\207\344\273\266", nullptr));
+#endif // QT_CONFIG(tooltip)
+        open_pushButton->setText(QCoreApplication::translate("termial", "\346\211\223\345\274\200", nullptr));
+        label_31->setText(QCoreApplication::translate("termial", "0~", nullptr));
+#if QT_CONFIG(tooltip)
+        channelMaxNum_spinBox->setToolTip(QCoreApplication::translate("termial", "\345\277\253\351\200\237\345\213\276\351\200\211\344\277\241\351\201\223", nullptr));
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        channelNum_lineEdit->setToolTip(QCoreApplication::translate("termial", "\350\267\263\350\275\254\350\207\263\345\257\271\345\272\224\344\277\241\351\201\223\345\217\267", nullptr));
+#endif // QT_CONFIG(tooltip)
+        channelNum_lineEdit->setPlaceholderText(QCoreApplication::translate("termial", "\350\267\263\350\275\254Channel", nullptr));
+#if QT_CONFIG(tooltip)
+        tableView->setToolTip(QString());
+#endif // QT_CONFIG(tooltip)
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("termial", "\347\274\226\347\250\213", nullptr));
     } // retranslateUi
 
 };

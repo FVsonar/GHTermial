@@ -22,6 +22,7 @@ QByteArray Channel_Service::build0x40(channel& cl)
     data.append(cl.getVfoaFrequency2());
     data.append(cl.getVfoaFrequency3());
     data.append(cl.getVfoaFrequency4());
+
     data.append(cl.getVfobFrequency1());
     data.append(cl.getVfobFrequency2());
     data.append(cl.getVfobFrequency3());
@@ -29,6 +30,8 @@ QByteArray Channel_Service::build0x40(channel& cl)
 
     data.append(cl.getEmitYayin());
     data.append(cl.getReceiveYayin());
+
+    data.append(cl.getChannelName());
 
     tool.addCrc(data);
     tool.addHead(data);

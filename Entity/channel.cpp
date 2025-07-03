@@ -287,7 +287,6 @@ QByteArray channel::toWriteFrequencyData()
 */
 void channel::radioWriteResponseToObj(QByteArray data){
 
-
     this->setStartBit1(data[0]);
     this->setStartBit2(data[1]);
     this->setStartBit3(data[2]);
@@ -356,6 +355,7 @@ QByteArray channel::toReadFrequencyData(){
     return data;
 }
 /**
+ *  0x41
 *   将读取命令带来的回复数据包拆分到类
 *   @value QByteArray data 回复数据包
 */
@@ -400,8 +400,6 @@ void channel::radioReadResponseToObj(QByteArray data){
     // 获取crc
     this->setCrcHigh(data[size-2]);
     this->setCrcLow(data[size-1]);
-
-
 
 }
 

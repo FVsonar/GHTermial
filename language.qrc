@@ -1,14 +1,14 @@
 <RCC>
     <qresource prefix="/">
-        <file>lang_Chinese.qm</file>
-        <file>lang_Arabic.qm</file>
-        <file>lang_English.qm</file>
-        <file>lang_French.qm</file>
-        <file>lang_German.qm</file>
-        <file>lang_Japanese.qm</file>
-        <file>lang_Portuguese.qm</file>
-        <file>lang_Spanish.qm</file>
-        <file>lang_Russian.qm</file>
-        <file>lang_Hindi.qm</file>
+        <file>language/lang_Arabic.qm</file>
+        <file>language/lang_Chinese.qm</file>
+        <file>language/lang_English.qm</file>
+        <file>language/lang_French.qm</file>
+        <file>language/lang_German.qm</file>
+        <file>language/lang_Hindi.qm</file>
+        <file>language/lang_Japanese.qm</file>
+        <file>language/lang_Portuguese.qm</file>
+        <file>language/lang_Russian.qm</file>
+        <file>language/lang_Spanish.qm</file>
     </qresource>
 </RCC>
